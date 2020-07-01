@@ -412,6 +412,7 @@ def check_precondition_and_warning(args):
     #     +----
     # The default value for args.nbcontainer is 1. Even if the user
     # does not give this argument, it will be set to 1 automatically.
+    # See parser() for more info about the arguments
         if args.nbcontainer > 1 and len(args.configs) > 1:
             raise Warning("You do not need to set nbcontainer if you\
                                         give many configuration files")
