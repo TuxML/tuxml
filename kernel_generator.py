@@ -216,7 +216,7 @@ def docker_build(image=None, tag=None, path=None):
     """    
     if path is None:
         path = "."
-    str_build = "docker build".format(image)
+    str_build = "docker build"
     if image is not None:
         str_build = "{} -t {}".format(str_build, image)
         if tag is not None:
