@@ -83,7 +83,7 @@ def ask_for_confirmation():
     
     """
     answer = input().lower()
-    while answer != 'n' and answer != 'y':
+    while answer not in ('n', 'y'):
         print("y/n")
         answer = input().lower()
     return answer == 'y'
