@@ -400,7 +400,7 @@ def check_precondition_and_warning(args):
     # precondition
     if args.nbcontainer <= 0:
         raise ValueError("You can't run less than 1 container for compilation.")
-
+    if args.configs is not None:
     # If we get more that 1 .config, the argument args.nbcontainer
     # will be ignored and the number of containers to create should be
     # as much as the number of given configuration files. Hence, the
@@ -412,10 +412,9 @@ def check_precondition_and_warning(args):
     #     +----
     # The default value for args.nbcontainer is 1. Even if the user
     # does not give this argument, it will be set to 1 automatically.
-    if args.nbcontainer > 1 and len(args.configs) > 1:
-        raise Warning(
-            "You do not need to set nbcontainer if you give many configuration\
-            files")
+        if args.nbcontainer > 1 and len(args.configs) > 1:
+            raise Warning("You do not need to set nbcontainer if you\
+                                        give many configuration files")
     if args.incremental < 0:
         raise ValueError("You can't use incremental with negative value.")
     if args.tiny and (args.configs is not None):
@@ -856,8 +855,10 @@ def compilation(image, args):
     nbcontainer = args.nbcontainer
     nbconfigs = len(args.configs)
     # One does not care about nbcontainer as far as one gets more than
-    # one configs.
-    if nbconfigs > 1:
+    # one config.
+    # listconfig_mode: case when a list of configs is given as argument
+    listconfig_mode = nbconfigs > 1
+    if listconfig_mode:
         nbcontainer = nbconfigs
     
     for i in range(nbcontainer):
@@ -865,11 +866,17 @@ def compilation(image, args):
             set_prompt_color("Light_Blue")
             print("\n=============== Docker number ", i, " ===============")
             set_prompt_color()
+        # If the user gives only 1 config to compile on different
+        # containers
+        config = args.config[0]
+        # If the user gives a list of configurations to --config
+        if listconfig_mode:
+            config = args.config[i]
         container_id = run_docker_compilation(
             image,
             args.incremental,
             args.tiny,
-            args.configs[i],
+            config,
             args.seed,
             args.silent,
             args.number_cpu,
