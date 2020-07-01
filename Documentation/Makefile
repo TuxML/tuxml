@@ -21,7 +21,7 @@ sourcedoc:
 	$(SPHINXAPIDOC) -o $(SOURCEDOC)/compilation ../compilation --append-syspath
 	$(SPHINXAPIDOC) -o $(SOURCEDOC)/docker_management ../docker_management --append-syspath
 	$(SPHINXAPIDOC) -o $(SOURCEDOC)/miscellaneous ../miscellaneous --append-syspath
-	printf "=====\nTuxML\n=====\n.. toctree::\n\t:glob:\n\n\tmodules\n\t*/modules" > $(SOURCEDOC)/index.rst		
+	printf "=====\nTuxML\n=====\n.. warning:: TuxML supports Linux kernels' version >= 4.9.\n.. toctree::\n\t:glob:\n\n\tmodules\n\t*/modules" > $(SOURCEDOC)/index.rst		
 
 doc: sourcedoc
 	$(SPHINXBUILD) -c $(CONFIGPATH) -b html $(SOURCEDOC) $(DOC)
