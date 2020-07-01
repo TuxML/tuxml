@@ -43,7 +43,7 @@ def set_prompt_color(color="Default"):
 
     :param color: the color to set, defaults to Default, Gray, Black,\
     Red, Ligh_Red, Green, Light_Green, Orange, Light_Orange, Blue,\
-    Light_Blue, Purple, Light_Purple 
+    Light_Blue, Purple, Light_Purple
     :type color: str
 
     """
@@ -80,10 +80,9 @@ def ask_for_confirmation():
 
     :return: the input confirmation
     :rtype: boolean
-    
     """
     answer = input().lower()
-    while answer != 'n' and answer != 'y':
+    while answer not in ('n', 'y'):
         print("y/n")
         answer = input().lower()
     return answer == 'y'
@@ -213,10 +212,10 @@ def docker_build(image=None, tag=None, path=None):
     :param path: path to the dockerfile. Default to None, which is the\
     same as ``.`` (current directory)
     :type path: str
-    """    
+    """
     if path is None:
         path = "."
-    str_build = "docker build".format(image)
+    str_build = "docker build"
     if image is not None:
         str_build = "{} -t {}".format(str_build, image)
         if tag is not None:
@@ -240,13 +239,13 @@ def docker_build(image=None, tag=None, path=None):
 # # equivalent to . (current directory).
 def create_dockerfile(content=None, path=None):
     """Create and save a Dockerfile
-    
+
     :param content: dockerfile content
     :type content: str
     :param path: path to the directory to save the dockerfile.\
     Default to None, which is the same as ``.`` (current directory)
     """
-    
+
     if path is not None:
         os.chdir(path)
     with open("Dockerfile", "w") as file:
@@ -261,7 +260,7 @@ def create_dockerfile(content=None, path=None):
 # @param tag The tag's image. Default to None.
 def docker_pull(image, tag=None):
     """Pull a docker image
-    
+
     :param image: docker image to pull
     :type image: str
     :param tag: docker tag. Default to None.
@@ -286,7 +285,7 @@ def parser():
     `argparse <https://docs.python.org/3/library/argparse.html>`_\
     for more info.
     :rtype: `argparse.Namespace`_
-    
+
     .. _argparse.Namespace: https://docs.python.org/3.8/library/argparse.html#argparse.Namespace
     """
     parser = argparse.ArgumentParser(
@@ -338,8 +337,7 @@ def parser():
     parser.add_argument(
         "--configs",
         nargs="+", # if --config, need to give at least one .config
-        help="Give a path to specific configuration files. Incompatible with "
-             "--tiny argument."
+        help="Give a path to specific configuration files. Incompatible wit --tiny argument."
     )
     parser.add_argument(
         "--seed",
@@ -396,7 +394,7 @@ def check_precondition_and_warning(args):
     :type args: `argparse.Namespace`_
 
     .. _args.Namespace: https://docs.python.org/3.8/library/argparse.html#argparse.Namespace
-    """ 
+    """
     # precondition
     if args.nbcontainer <= 0:
         raise ValueError("You can't run less than 1 container for compilation.")
@@ -591,7 +589,8 @@ def docker_image_auto_cleaner(tag, old_image_id=None):
             )
 
 
-## replacement of docker_build_v4_image (generalize to any version... of course TuxML was designed for >4.8 version) 
+## replacement of docker_build_v4_image (generalize to any
+## version... of course TuxML was designed for >4.8 version)
 # @author PICARD Michaël, ACHER Mathieu
 # @version 1
 # @brief It will download and create an image with a different linux v4/v5 inside.
@@ -617,7 +616,7 @@ def docker_build_version_image(tag, version):
     :return: image's tag
     :rtype: str
 
-    """ 
+    """
     tagv = "{}-v{}".format(tag, version)
     if not docker_image_exist(__IMAGE, tagv):
         set_prompt_color("Purple")
@@ -655,7 +654,7 @@ def get_linux_kernel(name, path=None):
 
     :param name: Linux kernel version.
     :type name: str
-    
+   
     .. warning:: Linux kernel version must be v4.xx
 
     :param path: directory to save the Linux kernel in
@@ -667,7 +666,7 @@ def get_linux_kernel(name, path=None):
     list_dir = os.listdir('.')
     if name not in list_dir:
         print("Linux kernel not found, downloading", name)
-        if name.startswith("linux-4"): 
+        if name.startswith("linux-4"):
             wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v4.x/{}".format(name)
         elif name.startswith("linux-5"):
             wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v5.x/{}".format(name)
@@ -689,7 +688,7 @@ def docker_image_exist(image, tag=None):
 
     :param image: docker image to check
     :type image: str
-    :param tag: image's tag 
+    :param tag: image's tag
     :type tag: str
     :return: either the docker image exists or not
     :rtype: bool
@@ -854,25 +853,23 @@ def compilation(image, args):
     :type args: `argparse.Namespace`_
     """
     nbcontainer = args.nbcontainer
-    nbconfigs = len(args.configs)
     # One does not care about nbcontainer as far as one gets more than
     # one config.
     # listconfig_mode: case when a list of configs is given as argument
-    listconfig_mode = nbconfigs > 1
+    listconfig_mode = args.configs is not None and len(args.configs) > 1
     if listconfig_mode:
-        nbcontainer = nbconfigs
-    
+        nbcontainer = len(args.configs)
+    config = None
     for i in range(nbcontainer):
         if not args.silent:
             set_prompt_color("Light_Blue")
             print("\n=============== Docker number ", i, " ===============")
             set_prompt_color()
-        # If the user gives only 1 config to compile on different
-        # containers
-        config = args.config[0]
         # If the user gives a list of configurations to --config
         if listconfig_mode:
-            config = args.config[i]
+            config = args.configs[i]
+        if config is None:
+            config = args.configs[0]
         container_id = run_docker_compilation(
             image,
             args.incremental,
