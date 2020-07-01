@@ -332,12 +332,13 @@ def parser():
     parser.add_argument(
         "--tiny",
         action="store_true",
-        help="Use Linux tiny configuration. Incompatible with --config "
+        help="Use Linux tiny configuration. Incompatible with --configs "
              "argument."
     )
     parser.add_argument(
-        "--config",
-        help="Give a path to specific configuration file. Incompatible with "
+        "--configs",
+        nargs="+", # if --config, need to give at least one .config
+        help="Give a path to specific configuration files. Incompatible with "
              "--tiny argument."
     )
     parser.add_argument(
@@ -366,7 +367,7 @@ def parser():
         "--unit_testing",
         action="store_true",
         help="Optional. Run the unit testing of the compilation script. Prevent"
-             " any compilation to happen. Will disable --tiny, --config, "
+             " any compilation to happen. Will disable --tiny, --configs, "
              "--linux_version, --silent, --fetch_kernel and incremental "
              "feature during runtime."
     )
@@ -399,9 +400,25 @@ def check_precondition_and_warning(args):
     # precondition
     if args.nbcontainer <= 0:
         raise ValueError("You can't run less than 1 container for compilation.")
+
+    # If we get more that 1 .config, the argument args.nbcontainer
+    # will be ignored and the number of containers to create should be
+    # as much as the number of given configuration files. Hence, the
+    # following condition should be enough:
+    # if args.nbcontainer is more than the default value
+    #    and we got more than one config file
+    #     | raise Warning("You do not need to set nbcontainer if you\
+    #     |                              give  many configuration files")
+    #     +----
+    # The default value for args.nbcontainer is 1. Even if the user
+    # does not give this argument, it will be set to 1 automatically.
+    if args.nbcontainer > 1 and len(args.configs) > 1:
+        raise Warning(
+            "You do not need to set nbcontainer if you give many configuration\
+            files")
     if args.incremental < 0:
         raise ValueError("You can't use incremental with negative value.")
-    if args.tiny and (args.config is not None):
+    if args.tiny and (args.configs is not None):
         raise NotImplementedError(
             "You can't use tiny and config parameter at the same time."
         )
@@ -413,7 +430,7 @@ def check_precondition_and_warning(args):
     if args.unit_testing:
         args.incremental = 0
         args.tiny = None
-        args.config = None
+        args.configs = None
         args.silent = None
 
     # not implemented yet
@@ -440,9 +457,10 @@ def check_precondition_and_warning(args):
               "out to date, or you could crash if you don't have the image.")
     if args.tiny:
         print("You are using tiny configuration.")
-    if args.config is not None:
-        print("You are using your specific configuration : {}".format(
-            args.config))
+    if args.configs is not None:
+        print("You are using the following configuration(s):")
+        for conf in args.configs:
+            print("\t* {}".format(conf))
     if args.seed is not None:
         print("You are using your specific set of seed options")
     if args.unit_testing:
@@ -835,7 +853,14 @@ def compilation(image, args):
     :param args: parsed argument options
     :type args: `argparse.Namespace`_
     """
-    for i in range(args.nbcontainer):
+    nbcontainer = args.nbcontainer
+    nbconfigs = len(args.configs)
+    # One does not care about nbcontainer as far as one gets more than
+    # one configs.
+    if nbconfigs > 1:
+        nbcontainer = nbconfigs
+    
+    for i in range(nbcontainer):
         if not args.silent:
             set_prompt_color("Light_Blue")
             print("\n=============== Docker number ", i, " ===============")
@@ -844,7 +869,7 @@ def compilation(image, args):
             image,
             args.incremental,
             args.tiny,
-            args.config,
+            args.configs[i],
             args.seed,
             args.silent,
             args.number_cpu,
@@ -855,7 +880,7 @@ def compilation(image, args):
             fetch_logs(container_id, args.logs, args.silent)
         delete_docker_container(container_id)
     if not args.silent:
-        feedback_user(args.nbcontainer, args.incremental)
+        feedback_user(nbcontainer, args.incremental)
 
 
 def run_unit_testing(image):
