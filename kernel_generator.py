@@ -43,7 +43,7 @@ def set_prompt_color(color="Default"):
 
     :param color: the color to set, defaults to Default, Gray, Black,\
     Red, Ligh_Red, Green, Light_Green, Orange, Light_Orange, Blue,\
-    Light_Blue, Purple, Light_Purple 
+    Light_Blue, Purple, Light_Purple
     :type color: str
 
     """
@@ -591,7 +591,8 @@ def docker_image_auto_cleaner(tag, old_image_id=None):
             )
 
 
-## replacement of docker_build_v4_image (generalize to any version... of course TuxML was designed for >4.8 version) 
+## replacement of docker_build_v4_image (generalize to any
+## version... of course TuxML was designed for >4.8 version) 
 # @author PICARD Michaël, ACHER Mathieu
 # @version 1
 # @brief It will download and create an image with a different linux v4/v5 inside.
@@ -854,25 +855,23 @@ def compilation(image, args):
     :type args: `argparse.Namespace`_
     """
     nbcontainer = args.nbcontainer
-    nbconfigs = len(args.configs)
     # One does not care about nbcontainer as far as one gets more than
     # one config.
     # listconfig_mode: case when a list of configs is given as argument
-    listconfig_mode = nbconfigs > 1
+    listconfig_mode = args.configs is not None and len(args.configs) > 1
     if listconfig_mode:
-        nbcontainer = nbconfigs
-    
+        nbcontainer = len(args.configs)
+    config = None
     for i in range(nbcontainer):
         if not args.silent:
             set_prompt_color("Light_Blue")
             print("\n=============== Docker number ", i, " ===============")
             set_prompt_color()
-        # If the user gives only 1 config to compile on different
-        # containers
-        config = args.config[0]
         # If the user gives a list of configurations to --config
         if listconfig_mode:
-            config = args.config[i]
+            config = args.configs[i]
+        if config is None:
+            config = args.configs[0]
         container_id = run_docker_compilation(
             image,
             args.incremental,
