@@ -868,7 +868,7 @@ def compilation(image, args):
         # If the user gives a list of configurations to --config
         if listconfig_mode:
             config = args.configs[i]
-        if args.configs is not None:
+        if config is None and not args.tiny:
             config = args.configs[0]
         container_id = run_docker_compilation(
             image,
