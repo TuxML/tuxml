@@ -853,9 +853,7 @@ def compilation(image, args):
     :type args: `argparse.Namespace`_
     """
     nbcontainer = args.nbcontainer
-    # One does not care about nbcontainer as far as one gets more than
-    # one config.
-    # listconfig_mode: case when a list of configs is given as argument
+    # case when a list of configs is given as argument
     if args.configs is not None:
             nbcontainer = len(args.configs)
     config = None
@@ -866,7 +864,7 @@ def compilation(image, args):
             set_prompt_color()
         # If the user gives a list of configurations to --config
         if args.configs is not None:
-            if len(args.configs) > 1:
+            if len(args.configs) >= 1:
                 config = args.configs[i]
             # We do not need the following condition because
             # we will never reach it since nbcontainer = args.configs
