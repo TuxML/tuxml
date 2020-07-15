@@ -853,12 +853,9 @@ def compilation(image, args):
     :type args: `argparse.Namespace`_
     """
     nbcontainer = args.nbcontainer
-    # One does not care about nbcontainer as far as one gets more than
-    # one config.
-    # listconfig_mode: case when a list of configs is given as argument
-    listconfig_mode = args.configs is not None and len(args.configs) > 1
-    if listconfig_mode:
-        nbcontainer = len(args.configs)
+    # case when a list of configs is given as argument
+    if args.configs is not None:
+            nbcontainer = len(args.configs)
     config = None
     for i in range(nbcontainer):
         if not args.silent:
@@ -866,10 +863,14 @@ def compilation(image, args):
             print("\n=============== Docker number ", i, " ===============")
             set_prompt_color()
         # If the user gives a list of configurations to --config
-        if listconfig_mode:
-            config = args.configs[i]
-        if config is None and not args.tiny:
-            config = args.configs[0]
+        if args.configs is not None:
+            if len(args.configs) >= 1:
+                config = args.configs[i]
+            # We do not need the following condition because
+            # we will never reach it since nbcontainer = args.configs
+            # elif len(args.configs) == 1:
+            #     config = args.config[0]
+            # else is already handled by config = None earlier
         container_id = run_docker_compilation(
             image,
             args.incremental,
