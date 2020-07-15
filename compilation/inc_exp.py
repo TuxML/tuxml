@@ -27,3 +27,14 @@ def vmlinux_check(kernel, outputfn):
     """
     subprocess.run(args="du -sh {}/vmlinux > {}".format(kernel, outputfn),
                    shell=True)
+
+
+def bloat_o_meter_compare(kernel_src, kernel_inc, kernel_scratch, outputfn):
+    """
+    """
+    subprocess.run(args='{}/scripts/bloat-o-meter {}/vmlinux\
+    {}/vmlinux > {}'.format(kernel_src,
+                            kernel_scratch,
+                            kernel_inc, outputfn),
+                   shell=True)
+
