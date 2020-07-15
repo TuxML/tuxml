@@ -38,3 +38,10 @@ def bloat_o_meter_compare(kernel_src, kernel_inc, kernel_scratch, outputfn):
                             kernel_inc, outputfn),
                    shell=True)
 
+
+checkers = [builtin_check, vmlinux_check]
+def check(dest):
+    """
+    """
+    for checker in checkers:
+        checker(dest, "{}/{}-{}".format(data_dir, checker.__name__, dest))
