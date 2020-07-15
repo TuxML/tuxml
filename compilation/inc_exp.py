@@ -31,6 +31,32 @@ def compile(kernel_path, config, dest):
                 check=True)
 
 
+def inc_building(kernel_path, configs):
+    """Compiles incrementally some kernel according
+    to the given rules in configs
+    
+    :param kernel_path: path to the kernel
+    :type kernel_path: str
+    :param configs: list of rules 
+    :type configs: list(str)
+    """
+    dest = "kernel0"
+    compile(kernel_path, configs[0], dest)
+    check(dest)
+    config = configs[1:]
+    for i, config in enumerate(configs, 1):
+        # incremental
+        compile(kernel_path, config, dest)
+        check(dest)
+        # from scratch
+        from_scratch = "{}-scratch-{}".format(config, i)
+        compile(kernel_path, config, from_scratch)
+        check(from_scratch)
+        bloat_o_meter_compare(kernel_path,
+                              dest, from_scratch,
+                              "{}/bloat-{}".format(data_dir, i))
+    
+
 def builtin_check(kernel, outputfn):
     """Checks for the built-in files
     """
