@@ -20,3 +20,10 @@ def builtin_check(kernel, outputfn):
         subprocess.run(args='find {} -name "built-in.a" | xargs size |\
         sort -n -r -k 4 > {}'.format(kernel, outputfn),
                     shell=True)
+
+
+def vmlinux_check(kernel, outputfn):
+    """Checks for the size of vmlinux
+    """
+    subprocess.run(args="du -sh {}/vmlinux > {}".format(kernel, outputfn),
+                   shell=True)
