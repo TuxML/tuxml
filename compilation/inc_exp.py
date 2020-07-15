@@ -5,9 +5,15 @@ LOGFILE = "stderr.output"
 data_dir = "data"
 
 
-"""
-CHECKERS
-"""
+
+def inc_launcher(kernel_path, file):
+    rules = []
+    with open("file", 'r') as f:
+        rules = [l.strip('\n') for l in f.readlines()]
+    for i, r in enumerate(rules):
+        data_dir = data_dir[:-1] + str(i)
+        inc_building(kernel_path, r)
+
 
 def compile(kernel_path, config, dest):
     """Compiles a kernel in dest
@@ -55,7 +61,11 @@ def inc_building(kernel_path, configs):
         bloat_o_meter_compare(kernel_path,
                               dest, from_scratch,
                               "{}/bloat-{}".format(data_dir, i))
-    
+
+
+"""
+CHECKERS
+"""
 
 def builtin_check(kernel, outputfn):
     """Checks for the built-in files
