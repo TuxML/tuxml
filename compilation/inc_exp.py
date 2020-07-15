@@ -9,6 +9,28 @@ data_dir = "data"
 CHECKERS
 """
 
+def compile(kernel_path, config, dest):
+    """Compiles a kernel in dest
+    
+    :param kernel_path: path to the kernel to compile
+    :type kernel_path: str
+    :param config: path to a configuration
+    :type config: str
+    :param dest: directory to compile the kernel in
+    :type dest: str
+    """
+    subprocess.run(args="make -C {} O={} {}".format(kernel_path, dest, config),
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=LOGFILE,
+                check=True)
+    subprocess.run(args="make -C {} O={} -j4".format(kernel_path, dest),
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=LOGFILE,
+                check=True)
+
+
 def builtin_check(kernel, outputfn):
     """Checks for the built-in files
     """
