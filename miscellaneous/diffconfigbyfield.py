@@ -1,6 +1,6 @@
 """``diffconfigbyfield`` is a simple utility that compares two
-``.config`` files. Instead of the ``diffconfig`` of the Linux kernel
-(`source here
+``.config`` files. Instead of showing a sorted output like the
+``diffconfig`` of the Linux kernel (`source here
 <https://github.com/torvalds/linux/blob/v4.14/scripts/diffconfig>`_),
 ``diffconfigbyfield`` shows the diff by field in the ``.config`` file.
 
@@ -41,6 +41,7 @@ line with a leading ``~``.
 	  ~ MTD_OOPS: m -> y
 	  - MTD_PARTITIONED_MASTER: y
 	  + SM_FTL: y
+
 """
 
 USAGE =\
