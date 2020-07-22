@@ -168,6 +168,7 @@ def main():
     """
     if len(sys.argv) != 3:
         print(USAGE)
+        sys.exit()
     else:
         config1 = sys.argv[1]
         config2 = sys.argv[2]
