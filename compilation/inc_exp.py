@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import timeit
 
 
 def main():
@@ -41,17 +42,29 @@ def inc_build(kernel_path, configs):
         compiled_from_scratch = "scratch/{}".format(config)
         # scratch
         print("=> Compiling the kernel with {} from scratch".format(config))
-        os.system("mkdir scratch/{}".format(config))
-        os.system("cp {} scratch/{}/.config".format(config, config))
-        os.system("make -C {} O=../scratch/{}"\
-                  .format(kernel_for_scratch, config))
-        os.system("make -C {} mrpropper".format(kernel_for_scratch))
+        os.system("mkdir {}".format(compiled_from_scratch))
+        os.system("cp {} {}/.config".format(config, compiled_from_scratch))
+        print("Compiling from scratch {}".format(config))
+        input()
+        start = timeit.timeit()
+        os.system("make -C {} O=../{} -j4"\
+                  .format(kernel_for_scratch, compiled_from_scratch))
+        end = timeit.timeit()
+        scratch_time = end - start
+        os.system("make -C {} mrproper".format(kernel_for_scratch))
         print("[OK] Compilation done")
         # incremental
         print("=> Incremental compilation")
         os.system("cp {} {}/.config".format(config, kernel_for_inc))
-        os.system("make -C {}".format(kernel_for_inc))
+        start = timeit.timeit()
+        os.system("make -C {} -j4".format(kernel_for_inc))
+        end = timeit.timeit()
+        incremental_time = end - start
         print("[OK] Compilation done")
+        with open("{}/comp_time".format(compiled_from_scratch), 'w') as tfile:
+            tfile.write(
+                "scratch: {}\nincremental: {}"\
+                .format(scratch_time, incremental_time))
         # check
         print("=> Checking...")
         os.system("cp {}/vmlinux {}/vmlinux.inc"\
@@ -75,12 +88,12 @@ def inc_build(kernel_path, configs):
         print("\t-> Vmlinux size check")
         os.system('echo "scratch" >> {}/vmsizecompare'\
                   .format(compiled_from_scratch))
-        os.system("echo $(du -sh vmlinux) >> {}/vmsizecompare"\
-                  .format(compiled_from_scratch))
+        os.system("echo $(du -sh {}/vmlinux) >> {}/vmsizecompare"\
+                  .format(compiled_from_scratch, compiled_from_scratch))
         os.system('echo "incremental" >> {}/vmsizecompare'\
                   .format(compiled_from_scratch))
-        os.system("echo $(du -sh vmlinux.inc) >> {}/vmsizecompare"\
-                  .format(compiled_from_scratch))
+        os.system("echo $(du -sh {}/vmlinux.inc) >> {}/vmsizecompare"\
+                  .format(compiled_from_scratch, compiled_from_scratch))
         print("[OK] Vmlinux size check done")
         # BUILT-IN
         print("\t-> Check for built-in.o");
@@ -103,7 +116,7 @@ def inc_build(kernel_path, configs):
         if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
                    .st_size == 0:
             print("\t\t/!\ No built-in.o")
-            print("\t\t* Checking for built-in.a")            
+            print("\t\t* Checking for built-in.a")
             os.system(
                 'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
                 > {}/builtinsize-inc'\
