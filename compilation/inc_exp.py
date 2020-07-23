@@ -34,33 +34,45 @@ def inc_build(kernel_path, configs):
     if tmp_l[-1].strip() == "/":
         tmp_l = tmp_l[:-1]
     kernel_name = tmp_l[-1]
-    kernel_for_scratch = "scratch/{}".format(kernel_name)
+    # kernel_for_scratch = "scratch/{}".format(kernel_name)
+    kernel_for_scratch = kernel_path
     kernel_for_inc = "inc/{}".format(kernel_name)
     for config in configs:
         compiled_from_scratch = "scratch/{}".format(config)
         # scratch
-        os.system("cp {} {}".format(config, kernel_for_scratch))
-        os.system("make -C {} O=../{}"\
+        print("=> Compiling the kernel with {} from scratch".format(config))
+        os.system("mkdir scratch/{}".format(config))
+        os.system("cp {} scratch/{}/.config".format(config, config))
+        os.system("make -C {} O=../scratch/{}"\
                   .format(kernel_for_scratch, config))
         os.system("make -C {} mrpropper".format(kernel_for_scratch))
+        print("[OK] Compilation done")
         # incremental
-        os.system("cp {} {}".format(config, kernel_for_inc))
+        print("=> Incremental compilation")
+        os.system("cp {} {}/.config".format(config, kernel_for_inc))
         os.system("make -C {}".format(kernel_for_inc))
+        print("[OK] Compilation done")
         # check
+        print("=> Checking...")
         os.system("cp {}/vmlinux {}/vmlinux.inc"\
                   .format(kernel_for_inc, compiled_from_scratch))
         # BLOAT-O-METER
         # bloat-o-meter vmlinux vmlinux.inc
+        print("\t-> Bloat-o-meter check")
+        print("\t\t* vmlinux | vmlinux.inc")
         os.system(
             "{}/scripts/bloat-o-meter {}/vmlinux {}/vmlinux.inc > {}/bloatsi"\
                   .format(kernel_for_scratch, compiled_from_scratch,
                           compiled_from_scratch, compiled_from_scratch))
         # bloat-o-meter vmlinux.inc vmlinux
+        print("\t\t* vmlinux.inc | vmlinux")
         os.system(
             "{}/scripts/bloat-o-meter {}/vmlinux.inc {}/vmlinux > {}/bloatis"\
                   .format(kernel_for_scratch, compiled_from_scratch,
                           compiled_from_scratch, compiled_from_scratch))
+        print("[OK] Bloat-o-meter done")
         # VMSIZE
+        print("\t-> Vmlinux size check")
         os.system('echo "scratch" >> {}/vmsizecompare'\
                   .format(compiled_from_scratch))
         os.system("echo $(du -sh vmlinux) >> {}/vmsizecompare"\
@@ -69,31 +81,35 @@ def inc_build(kernel_path, configs):
                   .format(compiled_from_scratch))
         os.system("echo $(du -sh vmlinux.inc) >> {}/vmsizecompare"\
                   .format(compiled_from_scratch))
+        print("[OK] Vmlinux size check done")
         # BUILT-IN
-        subprocess.run(
-            args=\
+        print("\t-> Check for built-in.o");
+        os.system(
             'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
             > {}/builtinsize-scratch'\
-            .format(compiled_from_scratch, compiled_from_scratch),
-            shell=True, check=True)
-        if os.stat("builtinsize-scratch").st_size == 0:
-            subprocess.run(
-                args='find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
+                  .format(compiled_from_scratch, compiled_from_scratch))
+        if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
+             .st_size == 0:
+            print("\t\t/!\ No built-in.o")
+            print("\t\t* Checking for built-in.a")
+            os.system(
+                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
                 > {}/builtinsize-scratch'\
-                .format(compiled_from_scratch, compiled_from_scratch),
-                shell=True, check=True)
-        subprocess.run(
-            args=\
+                .format(compiled_from_scratch, compiled_from_scratch))
+            print("\t\t[OK] built-in.a check done")
+        os.system(
             'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
-            > {}/builtinsize-inc'.format(kernel_for_inc, compiled_from_scratch),
-            shell=True, check=True)
-        if os.stat("builtinsize-scratch").st_size == 0:
-            subprocess.run(
-                args='find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
+            > {}/builtinsize-inc'.format(kernel_for_inc, compiled_from_scratch))
+        if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
+                   .st_size == 0:
+            print("\t\t/!\ No built-in.o")
+            print("\t\t* Checking for built-in.a")            
+            os.system(
+                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
                 > {}/builtinsize-inc'\
-                .format(kernel_for_inc, compiled_from_scratch),
-                shell=True, check=True)
-
+                .format(kernel_for_inc, compiled_from_scratch))
+            print("\t\t[OK] built-in.a check done")
+        print("[OK] Check done")
 
 if __name__ == "__main__":
     main()
