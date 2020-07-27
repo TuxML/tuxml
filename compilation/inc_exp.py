@@ -2,9 +2,7 @@
 """
 import os
 import sys
-import subprocess
 import timeit
-
 
 def main():
     if len(sys.argv) != 3:
@@ -45,22 +43,23 @@ def inc_build(kernel_path, configs):
         os.system("mkdir {}".format(compiled_from_scratch))
         os.system("cp {} {}/.config".format(config, compiled_from_scratch))
         print("Compiling from scratch {}".format(config))
-        input()
-        start = timeit.timeit()
-        os.system("make -C {} O=../{} -j4"\
-                  .format(kernel_for_scratch, compiled_from_scratch))
-        end = timeit.timeit()
-        scratch_time = end - start
+        cmd_scratch = 'os.system("make -C {} O=../{} -j4")'\
+            .format(kernel_for_scratch, compiled_from_scratch)
+        scratch_time = timeit.timeit(stmt=cmd_scratch,
+                                     setup="import os", number=1)
         os.system("make -C {} mrproper".format(kernel_for_scratch))
         print("[OK] Compilation done")
         # incremental
         print("=> Incremental compilation")
         os.system("cp {} {}/.config".format(config, kernel_for_inc))
-        start = timeit.timeit()
-        os.system("make -C {} -j4".format(kernel_for_inc))
-        end = timeit.timeit()
-        incremental_time = end - start
+        cmd_incremental = 'os.system("make -C {} -j4")'.format(kernel_for_inc)
+        incremental_time = timeit.timeit(stmt=cmd_incremental,
+                                         setup="import os", number=1)
         print("[OK] Compilation done")
+        # copy of the folder
+        os.system("mkdir inc/{} && cp -r {} inc/{}"\
+                  .format(config, kernel_for_inc, config))
+        # Writing compilation time in a file
         with open("{}/comp_time".format(compiled_from_scratch), 'w') as tfile:
             tfile.write(
                 "scratch: {}\nincremental: {}"\
@@ -86,24 +85,34 @@ def inc_build(kernel_path, configs):
         print("[OK] Bloat-o-meter done")
         # VMSIZE
         print("\t-> Vmlinux size check")
-        os.system('echo "scratch" >> {}/vmsizecompare'\
-                  .format(compiled_from_scratch))
-        os.system("echo $(du -sh {}/vmlinux) >> {}/vmsizecompare"\
-                  .format(compiled_from_scratch, compiled_from_scratch))
-        os.system('echo "incremental" >> {}/vmsizecompare'\
-                  .format(compiled_from_scratch))
-        os.system("echo $(du -sh {}/vmlinux.inc) >> {}/vmsizecompare"\
-                  .format(compiled_from_scratch, compiled_from_scratch))
+        with open("vmsizecompare", 'w') as vmf:
+            vmf.write("scratch: {}\n"\
+                      .format(os.path.getsize("{}/vmsizecompare"\
+                                              .format(compiled_from_scratch))))
+            vmf.write("incremental: {}\n"\
+                      .format(os.path.getsize("{}/vmlinux"\
+                                              .format(compiled_from_scratch))))
+        # Old version using command line
+        # ==============================
+        # os.system('echo "scratch" >> {}/vmsizecompare'\
+        #           .format(compiled_from_scratch))
+        # os.system("echo $(du -sh {}/vmlinux) >> {}/vmsizecompare"\
+        #           .format(compiled_from_scratch, compiled_from_scratch))
+        # os.system('echo "incremental" >> {}/vmsizecompare'\
+        #           .format(compiled_from_scratch))
+        # os.system("echo $(du -sh {}/vmlinux.inc) >> {}/vmsizecompare"\
+        #           .format(compiled_from_scratch, compiled_from_scratch))
+
         print("[OK] Vmlinux size check done")
         # BUILT-IN
-        print("\t-> Check for built-in.o");
+        print("\t-> Check for built-in.o")
         os.system(
             'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
             > {}/builtinsize-scratch'\
                   .format(compiled_from_scratch, compiled_from_scratch))
         if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
              .st_size == 0:
-            print("\t\t/!\ No built-in.o")
+            print("\t\t/!\\ No built-in.o")
             print("\t\t* Checking for built-in.a")
             os.system(
                 'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
@@ -115,14 +124,16 @@ def inc_build(kernel_path, configs):
             > {}/builtinsize-inc'.format(kernel_for_inc, compiled_from_scratch))
         if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
                    .st_size == 0:
-            print("\t\t/!\ No built-in.o")
+            print("\t\t/!\\ No built-in.o")
             print("\t\t* Checking for built-in.a")
             os.system(
                 'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
                 > {}/builtinsize-inc'\
                 .format(kernel_for_inc, compiled_from_scratch))
             print("\t\t[OK] built-in.a check done")
+        # Check timestamp of each files of kernel_for_inc
         print("[OK] Check done")
+
 
 if __name__ == "__main__":
     main()
