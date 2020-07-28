@@ -85,12 +85,12 @@ def inc_build(kernel_path, configs):
         print("[OK] Bloat-o-meter done")
         # VMSIZE
         print("\t-> Vmlinux size check")
-        with open("vmsizecompare", 'w') as vmf:
+        with open("{}/vmsizecompare".format(compiled_from_scratch), 'w') as vmf:
             vmf.write("scratch: {}\n"\
-                      .format(os.path.getsize("{}/vmsizecompare"\
+                      .format(os.path.getsize("{}/vmlinux"\
                                               .format(compiled_from_scratch))))
             vmf.write("incremental: {}\n"\
-                      .format(os.path.getsize("{}/vmlinux"\
+                      .format(os.path.getsize("{}/vmlinux.inc"\
                                               .format(compiled_from_scratch))))
         # Old version using command line
         # ==============================
