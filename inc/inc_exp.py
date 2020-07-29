@@ -19,6 +19,20 @@ where
     os.system("mkdir inc scratch && cp -r {} inc/".format(kernel_path))
     inc_launcher(kernel_path, file)
 
+    
+
+    
+
+def compile(kernel_src, config, compiled_dir=None, inc=False):
+    os.system("cp {} {}/.config".format(config, compiled_dir))
+    cc = "make -C {} ".format(kernel_src)
+    if compiled_dir is not None:
+        cc += "O={}".format(compiled_dir)
+    cc += "-j4"
+    os.system(cc)
+    if not inc:
+        os.system("make -C {} mrproper".format(kernel_src))
+
 
 def inc_launcher(kernel_path, file):
     rules = []
@@ -137,3 +151,34 @@ def inc_build(kernel_path, configs):
 
 if __name__ == "__main__":
     main()
+
+
+def built_in_checker(src_dir, res_file, verbose=False):
+    if verbose:
+        print("[c] CHECKER: BULT-IN...")
+        print("[i] Checking for built-in.o")
+    os.system(
+            'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
+            > {}'.format(src_dir, res_file))
+    if os.stat(res_file).st_size == 0:
+        if verbose:
+            print("\t[!] No built-in.o")
+            print("[i] Checking for built-in.a")
+        os.system(
+                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
+                > {}'.format(src_dir, res_file))
+    if verbose:
+        print("[x] CHECKER: BUILT-IN <DONE>")
+
+
+def vmlinux_size_checker(vms, vmi, res_file, verbose=False):
+    if verbose:
+        print("[c] CHECKER: VMLINUX SIZE")
+    scratch_size = os.path.getsize(vms)
+    incremental_size = os.path.getsize(vmi)
+    with open(res_file, 'w') as vmf:
+        vmf.write("scratch,incremental\n{},{}"\
+                  .format(scratch_size, incremental_size))
+    if verbose:
+        print("[x] CHECKER: VMLINUX SIZE <DONE>")
+
