@@ -52,8 +52,7 @@ def parse_file(filename):
 
 
 def parse(str_to_parse):
-    """Parser of the following grammar:
-
+    """String parser
     """
 
     sym = dict()
@@ -63,8 +62,8 @@ def parse(str_to_parse):
         if not os.path.exists(tokens[0]):
             raise FileNotFoundError("Line {}, col {}: {}"\
                                     .format(pyparsing.lineno(location, string),
-                                        pyparsing.col(location, string),
-                                        tokens[0]))
+                                            pyparsing.col(location, string),
+                                            tokens[0]))
         return tokens
 
 

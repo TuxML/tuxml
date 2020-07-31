@@ -3,35 +3,32 @@
 import os
 import sys
 import timeit
+import expdsl
+import kernel
 
 def main():
     if len(sys.argv) != 3:
         print(\
 """Usage:
-\tpython inc_expt <filename> <kernel>
+\tpython inc_exp <filename> <kernel>
 where
 \t<filename> is the file containing the configs to compile
 \t<kernel> is a path to the kernel source code
 """)
         sys.exit()
+
     file = sys.argv[1]
     kernel_path = sys.argv[2]
+
+    
     os.system("mkdir inc scratch && cp -r {} inc/".format(kernel_path))
     inc_launcher(kernel_path, file)
 
-    
 
-    
 
-def compile(kernel_src, config, compiled_dir=None, inc=False):
-    os.system("cp {} {}/.config".format(config, compiled_dir))
-    cc = "make -C {} ".format(kernel_src)
-    if compiled_dir is not None:
-        cc += "O={}".format(compiled_dir)
-    cc += "-j4"
-    os.system(cc)
-    if not inc:
-        os.system("make -C {} mrproper".format(kernel_src))
+
+
+
 
 
 def inc_launcher(kernel_path, file):
@@ -181,4 +178,3 @@ def vmlinux_size_checker(vms, vmi, res_file, verbose=False):
                   .format(scratch_size, incremental_size))
     if verbose:
         print("[x] CHECKER: VMLINUX SIZE <DONE>")
-

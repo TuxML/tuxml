@@ -85,7 +85,8 @@ class Kernel:
             ccmd += " O={}".format(dest)
         ccmd += " -j4"
         if time:
-            self._ctime = timeit.timeit(stmt=ccmd, setup="import os", number=1)
+            self._ctime = timeit.timeit(stmt='os.system("{}")'.format(ccmd),
+                                        setup="import os", number=1)
         else:
             os.system(ccmd)
 
@@ -171,3 +172,13 @@ class Checker:
         if self._verbose:
             print("[x] CHECKER: VMLINUX SIZE <DONE>")
         return os.path.getsize(vmlinux)
+
+    def dir_full_timestamp(self):
+        """Write into a file the timestamp of each file of the directory"""
+        if self._verbose:
+            print("[c] CHECKER: DIR TIMESTAMP")
+        res_file = "{}/dir.tmstp".format(self._kernel.get_dir_name())
+        os.system("find {} -printf '%C@ %p\n' > {}"\
+                  .format(self._kernel.get_dir_name(), res_file))
+        if self._verbose:
+            print("[x] CHECKER: DIR TIMESTAMP <DONE>")
