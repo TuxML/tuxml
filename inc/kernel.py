@@ -117,3 +117,20 @@ class Kernel:
 
         """
         return self._dir
+
+
+class Checker:
+    """Checker of kernel's properties
+
+    :param ker_obj: a Linux kernel
+    :type ker_obj: kernel.Kernel
+    :param verbose: ``True`` to make the checker verbose. ``False``\
+    otherwise
+    :type verbose: bool
+    """
+
+    def __init__(self, ker_obj, verbose=False):
+        if not isinstance(ker_obj, Kernel):
+            raise TypeError("Parameter should be of type Kernel")
+        self._kernel = ker_obj
+        self._verbose = verbose
