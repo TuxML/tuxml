@@ -103,3 +103,7 @@ class Kernel:
 
         """
         return self._ctime
+
+    def dir_full_timestamp(self):
+        """Write into a file the timestamp of each file of the directory"""
+        os.system("find {} -printf '%C@ %p\n' > dir.tmstp".format(self._dir))
