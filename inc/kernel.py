@@ -182,3 +182,20 @@ class Checker:
                   .format(self._kernel.get_dir_name(), res_file))
         if self._verbose:
             print("[x] CHECKER: DIR TIMESTAMP <DONE>")
+
+    def bloat_o_meter(self, other):
+        """Bloat_o_meter of two vmlinux
+        :param other: other kernel object
+        :type other: Kernel
+        """
+        if self._verbose:
+            print("[c] CHECKER: BLOAT-O-METER")
+        this_vmlinux = "{}/vmlinux".format(self._kernel.get_dir_name())
+        other_vmlinux = "{}/vmlinux".format(other.get_compile_time())
+        res_file = "{}/bloatto".format(self._kernel.get_dir_name())
+        cmd = "{}/scripts {} {} > {}".format(self._kernel.get_dir_name(),
+                                             this_vmlinux, other_vmlinux,
+                                             res_file)
+        os.system(cmd)
+        if self._verbose:
+            print("[x] CHECKER: BLOAT-O-METER <DONE>")
