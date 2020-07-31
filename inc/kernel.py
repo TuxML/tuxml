@@ -134,3 +134,32 @@ class Checker:
             raise TypeError("Parameter should be of type Kernel")
         self._kernel = ker_obj
         self._verbose = verbose
+
+    def check(self):
+        """Launch checks on the kernel dir"""
+        pass
+
+    def builtin(self, verbose=False):
+        """Checks for every built-in.(a|o) of the directory recursively and
+        get their size. Write the result in a file.
+
+        :param verbose: ``True`` to make the checker verbose. ``False``\
+        otherwise
+        :type verbose: bool
+        """
+        res_file = "{}/builtins.size".format(self._kernel.get_dir_name())
+        if verbose:
+            print("[c] CHECKER: BULT-IN...")
+            print("[i] Checking for built-in.o")
+        os.system(
+            'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
+            > {}'.format(self._kernel.get_dir_name(), res_file))
+        if os.stat(res_file).st_size == 0:
+            if verbose:
+                print("\t[!] No built-in.o")
+                print("[i] Checking for built-in.a")
+            os.system(
+                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
+                > {}'.format(self._kernel.get_dir_name(), res_file))
+        if verbose:
+            print("[x] CHECKER: BUILT-IN <DONE>")
