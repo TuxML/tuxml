@@ -139,27 +139,35 @@ class Checker:
         """Launch checks on the kernel dir"""
         pass
 
-    def builtin(self, verbose=False):
+    def builtin(self):
         """Checks for every built-in.(a|o) of the directory recursively and
         get their size. Write the result in a file.
-
-        :param verbose: ``True`` to make the checker verbose. ``False``\
-        otherwise
-        :type verbose: bool
         """
         res_file = "{}/builtins.size".format(self._kernel.get_dir_name())
-        if verbose:
+        if self._verbose:
             print("[c] CHECKER: BULT-IN...")
             print("[i] Checking for built-in.o")
         os.system(
             'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
             > {}'.format(self._kernel.get_dir_name(), res_file))
         if os.stat(res_file).st_size == 0:
-            if verbose:
+            if self._verbose:
                 print("\t[!] No built-in.o")
                 print("[i] Checking for built-in.a")
             os.system(
                 'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
                 > {}'.format(self._kernel.get_dir_name(), res_file))
-        if verbose:
+        if self._verbose:
             print("[x] CHECKER: BUILT-IN <DONE>")
+
+    def vmlinux_size(self):
+        """Vmlinux size
+        :return: size of vmlinux
+        :rtype: int
+        """
+        if self._verbose:
+            print("[c] CHECKER: VMLINUX SIZE")
+        vmlinux = "{}/vmlinux".format(self._kernel.get_dir_name())
+        if self._verbose:
+            print("[x] CHECKER: VMLINUX SIZE <DONE>")
+        return os.path.getsize(vmlinux)
