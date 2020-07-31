@@ -12,6 +12,13 @@ this class.
 .. notes:: can be improved by writing syscalls fully in Python instead
 of using ``os.system`` each time.
 
+This file contains also a Checker class. This class retrieve
+information from a Linux kernel directory.
+
+The aim of this file is to separate the kernel and the checkers and
+let users to write their own checker (not hide them) and check a
+Kernel using a simple method.
+
 """
 
 
@@ -104,6 +111,9 @@ class Kernel:
         """
         return self._ctime
 
-    def dir_full_timestamp(self):
-        """Write into a file the timestamp of each file of the directory"""
-        os.system("find {} -printf '%C@ %p\n' > dir.tmstp".format(self._dir))
+    def get_dir_name(self):
+        """Gives the name of the directory that contains the Kernel's
+        source
+
+        """
+        return self._dir
