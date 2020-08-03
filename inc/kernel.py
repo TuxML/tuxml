@@ -86,6 +86,7 @@ class Kernel:
             if dest is None:
                 os.system("cp {} {}/.config".format(config, self._dir))
             else:
+                os.system("mkdir {}".format(dest))
                 os.system("cp {} {}/.config".format(config, dest))
                 ccmd += " O={}".format(dest)
         ccmd += " -j4"
