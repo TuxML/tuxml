@@ -90,6 +90,10 @@ where
                 main_kernel.compile(config=config, dest=dest, time=True)
                 scratch_kernel = Kernel(dest)
                 # Check
+                with open("{}/compile_time"\
+                          .format(scratch_kernel.get_dir_name()), "w")\
+                          as time_file:
+                    time_file.write("{}".format(main_kernel.get_compile_time()))
                 scratch_checker = Checker(scratch_kernel, verbose=True)
                 scratch_checker.builtin()
                 main_kernel.clean()
