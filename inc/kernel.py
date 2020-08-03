@@ -81,14 +81,14 @@ class Kernel:
         ccmd = "make -C {}".format(self._dir)
         if config is None:
             if dest is not None:
-                ccmd += " O={}".format(dest)
+                ccmd += " O=../{}".format(dest)
         else:
             if dest is None:
                 os.system("cp {} {}/.config".format(config, self._dir))
             else:
                 os.system("mkdir -p {}".format(dest))
                 os.system("cp {} {}/.config".format(config, dest))
-                ccmd += " O={}".format(dest)
+                ccmd += " O=../{}".format(dest)
         ccmd += " -j4"
         print(ccmd)
         if time:
