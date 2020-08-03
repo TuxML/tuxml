@@ -79,11 +79,17 @@ class Kernel:
         :type time: bool
         """
         ccmd = "make -C {}".format(self._dir)
-        if config is not None:
-            os.system("cp {} {}/.config".format(config, self._dir))
-        if dest is not None:
-            ccmd += " O={}".format(dest)
+        if config is None:
+            if dest is not None:
+                ccmd += " O={}".format(dest)
+        else:
+            if dest is None:
+                os.system("cp {} {}/.config".format(config, self._dir))
+            else:
+                os.system("cp {} {}/.config".format(config, dest))
+                ccmd += " O={}".format(dest)
         ccmd += " -j4"
+        print(ccmd)
         if time:
             self._ctime = timeit.timeit(stmt='os.system("{}")'.format(ccmd),
                                         setup="import os", number=1)
