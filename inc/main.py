@@ -2,11 +2,42 @@
 """
 import os
 import sys
-import timeit
 import expdsl
-import kernel
+from kernel import Kernel, Checker
+from diffconfigbyfield import read_config
+
+
+SCRATCH_DIR = "scratch"
+
+
+def same_config(config1, config2):
+    """Checks if two configs are the same"""
+    dconfig1 = read_config(config1)
+    dconfig2 = read_config(config2)
+    return dconfig1 == dconfig2
+
+
+def already_compiled(cdir, config):
+    """Checks if a config was already compiled from scratch
+
+    :param cdir: directory that contains kernel compiled from scratch
+    :type cdir: str
+    :param config: a configuration (path to it)
+    :type config: str
+    :return: ``True`` if a kernel with the same config was already\
+    compiled. ``False`` otherwise.
+    :rtype: bool
+    """
+    for lkernel in os.listdir(cdir):
+        if os.path.isdir(lkernel):
+            if same_config("{}/{}/.config".format(cdir, lkernel), config):
+                return True
+    return False
+
 
 def main():
+    """Main function"""
+
     if len(sys.argv) != 3:
         print(\
 """Usage:
@@ -17,164 +48,69 @@ where
 """)
         sys.exit()
 
-    file = sys.argv[1]
+    expdsl_file = sys.argv[1]
     kernel_path = sys.argv[2]
 
-    
-    os.system("mkdir inc scratch && cp -r {} inc/".format(kernel_path))
-    inc_launcher(kernel_path, file)
+    os.system("mkdir {}".format(SCRATCH_DIR))
+    sym, chains = expdsl.parse_file(expdsl_file)
 
+    rep = lambda x: sym[x] if (x in sym) else x
+    chains = list(map(lambda l: list(map(rep, l)), chains))
+    main_kernel = Kernel(kernel_path)
+    main_kernel.clean()
 
-
-
-
-
-
-
-def inc_launcher(kernel_path, file):
-    rules = []
-    with open(file, 'r') as f:
-        rules = [l.strip('\n') for l in f.readlines()]
-    for rule in rules:
-        inc_build(kernel_path, [c.strip() for c in rule.split('->')])
-
-
-def inc_build(kernel_path, configs):
     tmp_l = kernel_path.split('/')
-    if tmp_l[-1].strip() == "/":
+    if tmp_l[-1].strip() == '/':
         tmp_l = tmp_l[:-1]
     kernel_name = tmp_l[-1]
-    # kernel_for_scratch = "scratch/{}".format(kernel_name)
-    kernel_for_scratch = kernel_path
-    kernel_for_inc = "inc/{}".format(kernel_name)
-    for config in configs:
-        compiled_from_scratch = "scratch/{}".format(config)
-        # scratch
-        print("=> Compiling the kernel with {} from scratch".format(config))
-        os.system("mkdir {}".format(compiled_from_scratch))
-        os.system("cp {} {}/.config".format(config, compiled_from_scratch))
-        print("Compiling from scratch {}".format(config))
-        cmd_scratch = 'os.system("make -C {} O=../{} -j4")'\
-            .format(kernel_for_scratch, compiled_from_scratch)
-        scratch_time = timeit.timeit(stmt=cmd_scratch,
-                                     setup="import os", number=1)
-        os.system("make -C {} mrproper".format(kernel_for_scratch))
-        print("[OK] Compilation done")
-        # incremental
-        print("=> Incremental compilation")
-        os.system("cp {} {}/.config".format(config, kernel_for_inc))
-        cmd_incremental = 'os.system("make -C {} -j4")'.format(kernel_for_inc)
-        incremental_time = timeit.timeit(stmt=cmd_incremental,
-                                         setup="import os", number=1)
-        print("[OK] Compilation done")
-        # copy of the folder
-        os.system("mkdir inc/{} && cp -r {} inc/{}"\
-                  .format(config, kernel_for_inc, config))
-        # Writing compilation time in a file
-        with open("{}/comp_time".format(compiled_from_scratch), 'w') as tfile:
-            tfile.write(
-                "scratch: {}\nincremental: {}"\
-                .format(scratch_time, incremental_time))
-        # check
-        print("=> Checking...")
-        os.system("cp {}/vmlinux {}/vmlinux.inc"\
-                  .format(kernel_for_inc, compiled_from_scratch))
-        # BLOAT-O-METER
-        # bloat-o-meter vmlinux vmlinux.inc
-        print("\t-> Bloat-o-meter check")
-        print("\t\t* vmlinux | vmlinux.inc")
-        os.system(
-            "{}/scripts/bloat-o-meter {}/vmlinux {}/vmlinux.inc > {}/bloatsi"\
-                  .format(kernel_for_scratch, compiled_from_scratch,
-                          compiled_from_scratch, compiled_from_scratch))
-        # bloat-o-meter vmlinux.inc vmlinux
-        print("\t\t* vmlinux.inc | vmlinux")
-        os.system(
-            "{}/scripts/bloat-o-meter {}/vmlinux.inc {}/vmlinux > {}/bloatis"\
-                  .format(kernel_for_scratch, compiled_from_scratch,
-                          compiled_from_scratch, compiled_from_scratch))
-        print("[OK] Bloat-o-meter done")
-        # VMSIZE
-        print("\t-> Vmlinux size check")
-        with open("{}/vmsizecompare".format(compiled_from_scratch), 'w') as vmf:
-            vmf.write("scratch: {}\n"\
-                      .format(os.path.getsize("{}/vmlinux"\
-                                              .format(compiled_from_scratch))))
-            vmf.write("incremental: {}\n"\
-                      .format(os.path.getsize("{}/vmlinux.inc"\
-                                              .format(compiled_from_scratch))))
-        # Old version using command line
-        # ==============================
-        # os.system('echo "scratch" >> {}/vmsizecompare'\
-        #           .format(compiled_from_scratch))
-        # os.system("echo $(du -sh {}/vmlinux) >> {}/vmsizecompare"\
-        #           .format(compiled_from_scratch, compiled_from_scratch))
-        # os.system('echo "incremental" >> {}/vmsizecompare'\
-        #           .format(compiled_from_scratch))
-        # os.system("echo $(du -sh {}/vmlinux.inc) >> {}/vmsizecompare"\
-        #           .format(compiled_from_scratch, compiled_from_scratch))
 
-        print("[OK] Vmlinux size check done")
-        # BUILT-IN
-        print("\t-> Check for built-in.o")
-        os.system(
-            'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
-            > {}/builtinsize-scratch'\
-                  .format(compiled_from_scratch, compiled_from_scratch))
-        if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
-             .st_size == 0:
-            print("\t\t/!\\ No built-in.o")
-            print("\t\t* Checking for built-in.a")
-            os.system(
-                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
-                > {}/builtinsize-scratch'\
-                .format(compiled_from_scratch, compiled_from_scratch))
-            print("\t\t[OK] built-in.a check done")
-        os.system(
-            'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
-            > {}/builtinsize-inc'.format(kernel_for_inc, compiled_from_scratch))
-        if os.stat("{}/builtinsize-scratch".format(compiled_from_scratch))\
-                   .st_size == 0:
-            print("\t\t/!\\ No built-in.o")
-            print("\t\t* Checking for built-in.a")
-            os.system(
-                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
-                > {}/builtinsize-inc'\
-                .format(kernel_for_inc, compiled_from_scratch))
-            print("\t\t[OK] built-in.a check done")
-        # Check timestamp of each files of kernel_for_inc
-        print("[OK] Check done")
+    dir_sym = dict()
+    for i, chain in enumerate(chains):
+        incremental_dir = "incremental{}".format(i)
+        os.system("mkdir {}".format(incremental_dir))
+        os.system("cp -r {} {}".format(main_kernel.get_dir_name(),
+                                       incremental_dir))
+        incremental_kernel = Kernel("{}/{}".format(incremental_dir,
+                                                   kernel_name))
+        with open("{}/chain".format(incremental_dir), 'w') as ifile:
+            ifile.write("\n".join(chain))
+
+        for j, config in enumerate(chain):
+            # COMPIL FROM SCRATCH IF NEEDED
+            scratch_kernel = None
+            if not already_compiled(SCRATCH_DIR, config):
+                dest = "{}/".format(SCRATCH_DIR)
+                if config in sym.values():
+                    for k in sym:
+                        if sym[k] == config:
+                            dest += k
+                else:
+                    dest += "config{}-{}".format(i, j)
+                dir_sym[config] = dest
+                main_kernel.compile(config=config, dest=dest, time=True)
+                scratch_kernel = Kernel(dest)
+                # Check
+                scratch_checker = Checker(scratch_kernel, verbose=True)
+                scratch_checker.builtin()
+                main_kernel.clean()
+            else:
+                scratch_kernel = Kernel(dir_sym[config])
+            # INCREMENTAL COMPILATION
+            incremental_kernel.compile(config=config, time=True)
+            # Check
+            incremental_checker = Checker(incremental_kernel, verbose=True)
+            incremental_checker.builtin()
+            incremental_checker.dir_full_timestamp()
+            if j > 0:
+                with open("{}/compile_time".format(incremental_kernel),
+                          'w') as time_file:
+                    time_file.write("{}".format(
+                        incremental_kernel.get_compile_time()))
+            if j > 0:
+                assert scratch_kernel is not None, "SCRATCH KERNEL is None"
+                incremental_checker.bloat_o_meter(scratch_kernel)
+            incremental_kernel.save("{}/config{}".format(incremental_dir, j))
 
 
 if __name__ == "__main__":
     main()
-
-
-def built_in_checker(src_dir, res_file, verbose=False):
-    if verbose:
-        print("[c] CHECKER: BULT-IN...")
-        print("[i] Checking for built-in.o")
-    os.system(
-            'find {} -name "built-in.o" | xargs size | sort -n -r -k 4\
-            > {}'.format(src_dir, res_file))
-    if os.stat(res_file).st_size == 0:
-        if verbose:
-            print("\t[!] No built-in.o")
-            print("[i] Checking for built-in.a")
-        os.system(
-                'find {} -name "built-in.a" | xargs size | sort -n -r -k 4\
-                > {}'.format(src_dir, res_file))
-    if verbose:
-        print("[x] CHECKER: BUILT-IN <DONE>")
-
-
-def vmlinux_size_checker(vms, vmi, res_file, verbose=False):
-    if verbose:
-        print("[c] CHECKER: VMLINUX SIZE")
-    scratch_size = os.path.getsize(vms)
-    incremental_size = os.path.getsize(vmi)
-    with open(res_file, 'w') as vmf:
-        vmf.write("scratch,incremental\n{},{}"\
-                  .format(scratch_size, incremental_size))
-    if verbose:
-        print("[x] CHECKER: VMLINUX SIZE <DONE>")
