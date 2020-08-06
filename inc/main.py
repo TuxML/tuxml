@@ -106,7 +106,8 @@ where
             incremental_checker.builtin()
             incremental_checker.dir_full_timestamp()
             if j > 0:
-                with open("{}/compile_time".format(incremental_dir), 'w')\
+                with open("{}/compile_time"\
+                          .format(incremental_kernel.get_dir_name()), 'w')\
                      as time_file:
                     time_file.write("{}".format(
                         incremental_kernel.get_compile_time()))
