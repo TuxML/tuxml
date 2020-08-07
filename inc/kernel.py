@@ -198,11 +198,11 @@ class Checker:
         if self._verbose:
             print("[c] CHECKER: BLOAT-O-METER")
         this_vmlinux = "{}/vmlinux".format(self._kernel.get_dir_name())
-        other_vmlinux = "{}/vmlinux".format(other.get_compile_time())
+        other_vmlinux = "{}/vmlinux".format(other.get_dir_name())
         res_file = "{}/bloatto".format(self._kernel.get_dir_name())
-        cmd = "{}/scripts {} {} > {}".format(self._kernel.get_dir_name(),
-                                             this_vmlinux, other_vmlinux,
-                                             res_file)
+        cmd = "python3 {}/scripts/ {} {} > {}"\
+            .format(self._kernel.get_dir_name(), this_vmlinux, other_vmlinux,
+                    res_file)
         os.system(cmd)
         if self._verbose:
             print("[x] CHECKER: BLOAT-O-METER <DONE>")
