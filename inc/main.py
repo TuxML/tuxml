@@ -4,35 +4,9 @@ import os
 import sys
 import expdsl
 from kernel import Kernel, Checker
-from diffconfigbyfield import read_config
 
 
 SCRATCH_DIR = "scratch"
-
-
-def same_config(config1, config2):
-    """Checks if two configs are the same"""
-    dconfig1 = read_config(config1)
-    dconfig2 = read_config(config2)
-    return dconfig1 == dconfig2
-
-
-def already_compiled(cdir, config):
-    """Checks if a config was already compiled from scratch
-
-    :param cdir: directory that contains kernel compiled from scratch
-    :type cdir: str
-    :param config: a configuration (path to it)
-    :type config: str
-    :return: ``True`` if a kernel with the same config was already\
-    compiled. ``False`` otherwise.
-    :rtype: bool
-    """
-    for lkernel in os.listdir(cdir):
-        if os.path.isdir(lkernel):
-            if same_config("{}/{}/.config".format(cdir, lkernel), config):
-                return True
-    return False
 
 
 def main():
