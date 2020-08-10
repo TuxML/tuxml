@@ -44,20 +44,26 @@ where
     kernel_name = tmp_l[-1]
 
     dir_sym = dict()
+    compiled_config = set()
+    print("- Compilation exp start")
     for i, chain in enumerate(chains):
         incremental_dir = "incremental{}".format(i)
+        print("- Creating incremental dir: {}".format(incremental_dir))
         os.system("mkdir {}".format(incremental_dir))
-        os.system("cp -r {} {}".format(main_kernel.get_dir_name(),
-                                       incremental_dir))
-        incremental_kernel = Kernel("{}/{}".format(incremental_dir,
-                                                   kernel_name))
+        # os.system("cp -rp {} {}".format(main_kernel.get_dir_name(),
+        #                                incremental_dir))
+        # incremental_kernel = Kernel("{}/{}".format(incremental_dir,
+        #                                            kernel_name))
+        incremental_kernel = None
         with open("{}/chain".format(incremental_dir), 'w') as ifile:
             ifile.write("\n".join(chain))
 
         for j, config in enumerate(chain):
-            # COMPIL FROM SCRATCH IF NEEDED
             scratch_kernel = None
-            if not already_compiled(SCRATCH_DIR, config):
+            if config not in compiled_config:
+                # COMPILE FROM SCRATCH
+                print("- Current config was not already compiled")
+                print("- COMPILATION FROM SCRATCH")
                 dest = "{}/".format(SCRATCH_DIR)
                 if config in sym.values():
                     for k in sym:
@@ -65,36 +71,57 @@ where
                             dest += k
                 else:
                     dest += "config{}-{}".format(i, j)
-                dir_sym[config] = dest
-                main_kernel.compile(config=config, dest=dest, time=True)
-                scratch_kernel = Kernel(dest)
+                os.system("mkdir {}".format(dest))
+                os.system("cp -rp {} {}".format(main_kernel.get_dir_name(),
+                                                dest))
+                dir_sym[config] = "{}/{}"\
+                                        .format(dest, kernel_name)
+                print("- Target dir: {}".format(dir_sym[config]))
+                scratch_kernel = Kernel(dir_sym[config])
+                print("- Compiling...")
+                scratch_kernel.compile(config=config, time=True)
+                print("- Compilation done")
+                compiled_config.add(config)
                 # Check
+                print("- CHECKING")
                 with open("{}/compile_time"\
                           .format(scratch_kernel.get_dir_name()), "w")\
                           as time_file:
-                    time_file.write("{}".format(main_kernel.get_compile_time()))
+                    time_file.write("{}"\
+                                    .format(scratch_kernel.get_compile_time()))
                 scratch_checker = Checker(scratch_kernel, verbose=True)
                 scratch_checker.builtin()
-                main_kernel.clean()
-            else:
+            else:               # if config not in compiled_config
                 scratch_kernel = Kernel(dir_sym[config])
-            # INCREMENTAL COMPILATION
-            incremental_kernel.compile(config=config, time=True)
-            # Check
-            incremental_checker = Checker(incremental_kernel, verbose=True)
-            incremental_checker.builtin()
-            incremental_checker.dir_full_timestamp()
-            if j > 0:
+            # At this point, a kernel should be compiled
+            if j == 0:
+                scratch_kernel.save(incremental_dir)
+            else:               # /!\
+                # INCREMENTAL COMPILATION
+                # Compiling the first configuration of an incremental
+                # configuration is the same as compiling from sratch
+                # this config
+                print("- INCREMENTAL COMPILATION")
+                print("- Target dir: {}/{}"\
+                      .format(incremental_dir, kernel_name))
+                incremental_kernel = Kernel("{}/{}"\
+                                            .format(incremental_dir,
+                                                    kernel_name))
+                print("- Compiling...")
+                incremental_kernel.compile(config=config, time=True)
+                print("- Compilation done")
+                # Check
+                print("- CHECKING")
+                incremental_checker = Checker(incremental_kernel,
+                                              verbose=True)
+                incremental_checker.builtin()
+                incremental_checker.dir_full_timestamp()
                 with open("{}/compile_time"\
                           .format(incremental_kernel.get_dir_name()), 'w')\
-                     as time_file:
+                          as time_file:
                     time_file.write("{}".format(
                         incremental_kernel.get_compile_time()))
-            if j > 0:
-                assert scratch_kernel is not None, "SCRATCH KERNEL is None"
-                incremental_checker.bloat_o_meter(scratch_kernel)
-            incremental_kernel.save("{}/config{}".format(incremental_dir, j))
-
-
+                incremental_kernel.save("{}/{}"\
+                                        .format(incremental_dir, config))
 if __name__ == "__main__":
     main()
