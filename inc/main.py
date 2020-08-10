@@ -22,15 +22,20 @@ where
 """)
         sys.exit()
 
+    print("INCREMENTAL COMPILATION EXPERIMENTATION")
     expdsl_file = sys.argv[1]
     kernel_path = sys.argv[2]
-
+    print("* Exp spec file: {}".format(expdsl_file))
+    print("* Kernel path: {}".format(kernel_path))
+    print("- Directory for compilation from scratch: {}".format(SCRATCH_DIR))
     os.system("mkdir {}".format(SCRATCH_DIR))
+    print("- Parsing {} ...".format(expdsl_file))
     sym, chains = expdsl.parse_file(expdsl_file)
 
     rep = lambda x: sym[x] if (x in sym) else x
     chains = list(map(lambda l: list(map(rep, l)), chains))
     main_kernel = Kernel(kernel_path)
+    print("- Clean {}".format(kernel_path))
     main_kernel.clean()
 
     tmp_l = kernel_path.split('/')
