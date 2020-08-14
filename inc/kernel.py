@@ -109,7 +109,12 @@ class Kernel:
         in
         :type save_dir: str
         """
-        os.system("cp -r {} {}".format(self._dir, save_dir))
+        os.system("cp -rp {} {}".format(self._dir, save_dir))
+
+    def _set_compile_time_from_file(self, time_file):
+        if os.path.exists(time_file):
+            with open(time_file, 'r') as tfile:
+                self._ctime = float(tfile.readlines()[0].strip("\n"))
 
     def get_compile_time(self):
         """Gives compile time of previous compilation.
@@ -117,7 +122,11 @@ class Kernel:
         .. warning:: ``0`` if the kernel was not compiled yet.
 
         """
+        if self._ctime == 0:
+            compile_time_filename = "{}/compile_time".format(self._dir)
+            self._set_compile_time_from_file(compile_time_filename)
         return self._ctime
+
 
     def get_dir_name(self):
         """Gives the name of the directory that contains the Kernel's
@@ -200,7 +209,7 @@ class Checker:
         this_vmlinux = "{}/vmlinux".format(self._kernel.get_dir_name())
         other_vmlinux = "{}/vmlinux".format(other.get_dir_name())
         res_file = "{}/bloatto".format(self._kernel.get_dir_name())
-        cmd = "python3 {}/scripts/ {} {} > {}"\
+        cmd = "python3 {}/scripts/bloat-o-meter {} {} > {}"\
             .format(self._kernel.get_dir_name(), this_vmlinux, other_vmlinux,
                     res_file)
         os.system(cmd)
