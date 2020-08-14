@@ -24,7 +24,7 @@ where
 
     print("INCREMENTAL COMPILATION EXPERIMENTATION")
     expdsl_file = sys.argv[1]
-    kernel_path = sys.argv[2]
+    kernel_path = sys.argv[2].split('/')
     print("* Exp spec file: {}".format(expdsl_file))
     print("* Kernel path: {}".format(kernel_path))
     print("- Directory for compilation from scratch: {}".format(SCRATCH_DIR))
