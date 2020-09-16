@@ -32,7 +32,7 @@ Requirements : `Python3` and `Docker` are needed (do not forget to
 start the docker service usually with `sudo service docker start`).
 
 ```bash
-wget https://raw.githubusercontent.com/TuxML/ProjetIrma/dev/kernel_generator.py ; python3 kernel_generator.py --dev 1
+wget https://raw.githubusercontent.com/TuxML/tuxml/master/kernel_generator.py ; python3 kernel_generator.py --dev 1
 ```
 
 Copy this command and run it in a terminal. It will send compilation
