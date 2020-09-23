@@ -3,3 +3,4 @@ linux*.tar.xz
 .idea
 .code
 __pycache__
+LOGS
