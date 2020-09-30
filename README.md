@@ -117,3 +117,11 @@ make cleandoc
 
 (You can check `Documentation`'s `Makefile` for more info about the
 doc generation)
+
+## Some commands
+
+Generate local images and run the kernel generator
+
+```
+cd docker_management/; python3 docker_image_tuxml.py; cd ../; python3 kernel_generator.py --dev --local --tiny --logs LOGS 1
+```
