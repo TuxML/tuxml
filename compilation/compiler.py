@@ -120,7 +120,7 @@ class Compiler:
         self.__logger.reset_stderr_pipe()
         self.__compilation_success = True
 
-        while self.__compilation_success and not self.__compile():
+        while self.__compilation_success and not self.__compile(start_compilation_timer):
             start_installation_timer = time.time()
 
             success, missing_files, missing_package = self.__log_analyser()
@@ -221,32 +221,45 @@ class Compiler:
             )
 
     ## __compile
-    # @author LEBRETON Mickaël, PICARD Michaël
+    # @author LEBRETON Mickaël, PICARD Michaël, AMIARD Anthony
     # @version 2
     # @brief Run a compilation and return is successful or not.
-    # @details The main difference here is that this method don't count time
-    # spend nor try to fix if the compilation fail. It just call the make and
-    # return if the make is successful or not.
-    def __compile(self):
+    # @details The main difference here is that this method does not try to fix
+    # if the compilation fail. It just call the make and return if the make is
+    # successful or not.
+    # The compilation logs are printed on the output and logged in the
+    # stdout.log file prefixed with the time in the format:
+    # [00:00:00] make: Entering directory '/TuxML/linux-4.13.3'
+    # [00:00:00] scripts/kconfig/conf  --silentoldconfig Kconfig
+    # [00:00:01]   SYSTBL  arch/x86/entry/syscalls/../../include/generated/asm/syscalls_32.h
+    # [00:00:01]   SYSHDR  arch/x86/entry/syscalls/../../include/generated/asm/unistd_32_ia32.h
+    def __compile(self, start_compilation_timer=time.time()):
         """Compile a Linux kernel and returns the status of the compilation
-        (success or not). this method don't count time spend nor try
-        to fix if the compilation fail. It just call the make and
-        return if the make is successful or not.
+        (success or not). this method does not try to fix if the compilation
+        fail. It just call the make and return if the make is successful or not.
+        The compilation logs are printed on the output and logged in the
+        stdout.log file prefixed with the time.
 
+        :param start_compilation_timer: Time at which the method was called
+        (float)
         :return: status of the compilation: True if successful, False
         otherwise
         :rtype: bool
         """
         self.__logger.timed_print_output("Compilation in progress")
-        failure = subprocess.call(
-            args="make -C {} -j{}".format(
-                self.__kernel_path,
-                self.__nb_core
-            ),
-            shell=True,
-            stdout=self.__logger.get_stdout_pipe(),
-            stderr=self.__logger.get_stderr_pipe()
+        popen = subprocess.Popen(
+            ["make", "-C", self.__kernel_path, "-j{}".format(self.__nb_core)],
+            stdout=subprocess.PIPE,
+            stderr=self.__logger.get_stderr_pipe(),
+            universal_newlines=True
         )
+        for line in iter(popen.stdout.readline, ""):
+            now = time.time() - start_compilation_timer;
+            now_f = time.strftime("[%H:%M:%S] ", time.gmtime(now))
+            print(now_f + line, end="", file=self.__logger.get_stdout_pipe())
+            self.__logger.timed_print_output(line, end="")
+        popen.stdout.close()
+        failure = popen.wait()
         if not failure:
             self.__logger.timed_print_output(
                 "Compilation successful.",
