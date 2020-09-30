@@ -4,3 +4,5 @@ linux*.tar.xz
 .code
 __pycache__
 LOGS
+/Documentation/doc
+/Documentation/sourcedoc
