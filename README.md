@@ -123,5 +123,9 @@ doc generation)
 Generate local images and run the kernel generator
 
 ```
-cd docker_management/; python3 docker_image_tuxml.py; cd ../; python3 kernel_generator.py --dev --local --tiny --logs LOGS 1
+cd docker_management/; 
+python3 docker_image_tuxml.py; 
+cd ../; 
+python3 kernel_generator.py --dev --local --tiny --logs LOGS 1;
+```
 ```
