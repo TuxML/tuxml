@@ -128,4 +128,11 @@ python3 docker_image_tuxml.py;
 cd ../; 
 python3 kernel_generator.py --dev --local --tiny --logs LOGS 1;
 ```
+
+WIPE Docker images and containers /!\ WARNING all docker images and containers will be removed
+
+```
+docker stop $(docker ps -a -q); 
+docker rm $(docker ps -a -q); 
+docker rmi $(docker images -q); 
 ```
