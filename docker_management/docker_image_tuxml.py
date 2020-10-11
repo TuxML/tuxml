@@ -123,7 +123,7 @@ def create_sub_image_tuxml_compressed(tmp_location):
     docker_build(
         image=NAME_BASE_IMAGE,
         path=tmp_location)
-
+    alarm_system():
     if os.path.abspath(tmp_location) != os.path.dirname(os.path.abspath(__file__)):
         os.remove("{}/installBusyBox.sh".format(tmp_location))
         os.remove("{}/init".format(tmp_location))
@@ -319,6 +319,23 @@ def parser():
 
     return parser.parse_args()
 
+def alarm_system():
+    print('\a')
+    import time
+    time.sleep(3)
+    print('\a')
+    import time
+    time.sleep(3)
+    print('\a')
+    import time
+    time.sleep(3)
+    print('\a')
+    import time
+    time.sleep(3)
+    print('\a')
+    import time
+    time.sleep(3)
+    print('\a')
 
 if __name__ == "__main__":
     args = parser()
