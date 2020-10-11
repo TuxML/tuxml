@@ -3,7 +3,7 @@ LINUX_KERNEL = 'linux-4.13.3'
 ## Information about the base image
 NAME_BASE_IMAGE = "tuxml/basetuxml"
 
-BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps mcelog libcrypto++6 libssl-dev gcc-6-plugin-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu"
+BASIC_DEP = "gcc g++ gcc-7 gcc-8 g++-7 g++-8 make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps mcelog libcrypto++6 libssl-dev gcc-6-plugin-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu"
 
 # What will be written in the Dockerfile for the base image to produce the image.
 CONTENT_BASE_IMAGE = {
@@ -15,7 +15,8 @@ CONTENT_BASE_IMAGE = {
     'ENV_VARS': "ENV TZ=Europe/Paris\n"
                 "ENV DEBIAN_FRONTEND noninteractive",
     'ZONEINFO': "RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone",
-    'RUN_DEP': "RUN apt-get -qq -y update && apt-get -qq -y install python3 python3-dev python3-pip python3-setuptools default-libmysqlclient-dev apt-file apt-utils && apt-get install -qq -y --no-install-recommends --download-only " +
+    'RUN_DEP': "RUN echo deb http://ftp.de.debian.org/debian buster main >> /etc/apt/sources.list\n"
+               "RUN apt-get -qq -y update && apt-get -qq -y install python3 python3-dev python3-pip python3-setuptools default-libmysqlclient-dev apt-file apt-utils && apt-get install -qq -y --no-install-recommends --download-only " +
             BASIC_DEP,
     'RUN_DEP_FILE': "RUN echo " + BASIC_DEP + " > /dependencies.txt",
     'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov",
