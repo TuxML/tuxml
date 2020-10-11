@@ -376,6 +376,14 @@ def parser():
              "Useful if your computer can't handle the process at full power.",
         type=int
     )
+    parser.add_argument(
+        "-gcc",
+        "--gcc_version",
+        help="Optional. Specify the version of gcc to use while compiling."
+             "Can be version 6, 7 or 8. (default = 6)",
+        type=int,
+        default=6
+    )
 
     return parser.parse_args()
 
@@ -450,6 +458,8 @@ def check_precondition_and_warning(args):
               " access.")
     if args.dev:
         print("You are using the development version, whose can be unstable.")
+    if args.gcc_version:
+        print("You are using the version "+str(args.gcc_version)+" of gcc.")
     if args.local:
         print("You are using the local version, which means that you could be "
               "out to date, or you could crash if you don't have the image.")
