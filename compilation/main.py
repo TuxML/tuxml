@@ -67,7 +67,7 @@ def parser():
     parser.add_argument(
         "--gcc_version",
         help="Specify the version of gcc to use while compiling."
-             "Can be version 6, 7 or 8. (default = 6)",
+             "Can be version 6, 7, 8 or 9. (default = 6)",
         type=int,
         default=6
     )
@@ -327,12 +327,15 @@ def modify_gcc_version():
     apply_gcc6 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6"
     apply_gcc7 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7"
     apply_gcc8 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8"
+    apply_gcc9 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9"
     if args.gcc_version == 6:
         cmd = apply_gcc6
     elif args.gcc_version == 7:
         cmd = apply_gcc7
     elif args.gcc_version == 8:
         cmd = apply_gcc8
+    elif args.gcc_version == 9:
+        cmd = apply_gcc9
     else:
         cmd = apply_gcc6
     os.system(cmd)
