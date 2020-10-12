@@ -323,22 +323,10 @@ def parser():
 # @version 1
 # @brief Function for help to debug when building docker images.
 def alarm_system():
-    print('\a')
     import time
-    time.sleep(3)
-    print('\a')
-    import time
-    time.sleep(3)
-    print('\a')
-    import time
-    time.sleep(3)
-    print('\a')
-    import time
-    time.sleep(3)
-    print('\a')
-    import time
-    time.sleep(3)
-    print('\a')
+    for i in range(5):
+        print('\a')
+        time.sleep(3)
 
 if __name__ == "__main__":
     args = parser()
