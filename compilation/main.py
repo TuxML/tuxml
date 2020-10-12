@@ -336,8 +336,6 @@ def modify_gcc_version():
     else:
         cmd = apply_gcc6
     os.system(cmd)
-    cmd = "gcc --version"
-    os.system(cmd) 
 
 if __name__ == "__main__":
     # Initialisation
@@ -345,10 +343,10 @@ if __name__ == "__main__":
     logger = create_logger(args.silent)
     package_manager = PackageManager(logger, settings.DEPENDENCIES_FILE)
     package_manager.update_system()
+    modify_gcc_version()
     environment = retrieve_and_display_environment(logger)
     configuration = retrieve_and_display_configuration(logger, args)
 
-    modify_gcc_version()
 
     # Do a compilation, do the test and send result
     run(
