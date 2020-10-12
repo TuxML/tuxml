@@ -38,7 +38,7 @@ def add_additional_dependencies(dependencies = list()):
     dependencies = " ".join(dependencies)
 
     subprocess.run(
-        args="apt-get install -qq -y --no-install-recommends "
+        args="apt-get install -y --no-install-recommends "
              "--download-only {}".format(dependencies),
         shell=True
     )
