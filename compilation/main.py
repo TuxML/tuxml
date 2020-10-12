@@ -65,6 +65,13 @@ def parser():
         default=0
     )
     parser.add_argument(
+        "--gcc_version",
+        help="Specify the version of gcc to use while compiling."
+             "Can be version 6, 7 or 8. (default = 6)",
+        type=int,
+        default=6
+    )
+    parser.add_argument(
         "--boot",
         action="store_true",
         help="Optional. Try to boot the kernel after compilation if the compilation "
@@ -312,6 +319,25 @@ def remove_logs_file():
     for file in file_list:
         os.remove(os.path.join(settings.LOG_DIRECTORY, file))
 
+## modify_gcc_version
+# @author Fabien ZAPLANA
+# @version 1
+# @brief Modify the version of gcc to use
+def modify_gcc_version():
+    apply_gcc6 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6"
+    apply_gcc7 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7"
+    apply_gcc8 = "update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8"
+    if args.gcc_version == 6:
+        cmd = apply_gcc6
+    elif args.gcc_version == 7:
+        cmd = apply_gcc7
+    elif args.gcc_version == 8:
+        cmd = apply_gcc8
+    else:
+        cmd = apply_gcc6
+    os.system(cmd)
+    cmd = "gcc --version"
+    os.system(cmd) 
 
 if __name__ == "__main__":
     # Initialisation
@@ -321,6 +347,8 @@ if __name__ == "__main__":
     package_manager.update_system()
     environment = retrieve_and_display_environment(logger)
     configuration = retrieve_and_display_configuration(logger, args)
+
+    modify_gcc_version()
 
     # Do a compilation, do the test and send result
     run(

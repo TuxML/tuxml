@@ -458,7 +458,7 @@ def check_precondition_and_warning(args):
               " access.")
     if args.dev:
         print("You are using the development version, whose can be unstable.")
-    if args.gcc_version:
+    if (args.gcc_version == 7 or args.gcc_version == 8):
         print("You are using the version "+str(args.gcc_version)+" of gcc.")
     if args.local:
         print("You are using the local version, which means that you could be "
@@ -718,7 +718,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, seed,
-                           silent, cpu_cores, boot, check_size):
+                           silent, cpu_cores, gcc_version, boot, check_size):
     """Run a docker container to compiler a Linux kernel
 
     :param image: docker image
@@ -774,6 +774,8 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
         cpu_cores = "--cpu_cores {}".format(cpu_cores)
     else:
         cpu_cores = ""
+    if (gcc_version == 6 or gcc_version == 7 or gcc_version == 8):
+        gcc_version = "--gcc_version {}".format(gcc_version)
     if boot:
         boot = "--boot"
     else:
@@ -783,13 +785,14 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
     else:
         check_size = ""
     subprocess.call(
-        args="{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {}| ts -s'".format(
+        args="{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {}| ts -s'".format(
             __sudo_right,
             container_id,
             incremental,
             specific_configuration,
             silent,
             cpu_cores,
+            gcc_version,
             boot,
             check_size
         ),
@@ -889,6 +892,7 @@ def compilation(image, args):
             args.seed,
             args.silent,
             args.number_cpu,
+            args.gcc_version,
             args.boot,
             args.checksize
         )
