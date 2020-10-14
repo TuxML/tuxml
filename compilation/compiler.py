@@ -12,6 +12,7 @@ import shutil
 import time
 import os
 import bz2
+import threading
 
 from compilation.logger import *
 import compilation.settings as settings
@@ -219,16 +220,31 @@ class Compiler:
                 stderr=self.__logger.get_stderr_pipe(),
                 check=True
             )
+                
+    ## __log_output
+    # @author AMIARD Anthony
+    # @version 1
+    # @brief Print logs in a file with the time
+    # Print the logs from pipe_to_read in the log file pipe_to_write prefixed
+    # with the time at which the compilation started (start_compilation_timer)
+    def __log_output(self,
+                     pipe_to_read,
+                     pipe_to_write,
+                     start_compilation_timer):
+        for line in iter(pipe_to_read.readline, ""):
+            now = time.time() - start_compilation_timer;
+            now_f = time.strftime("[%H:%M:%S] ", time.gmtime(now))
+            print(now_f + line, end="", file=pipe_to_write)
 
     ## __compile
     # @author LEBRETON Mickaël, PICARD Michaël, AMIARD Anthony
-    # @version 2
+    # @version 3
     # @brief Run a compilation and return is successful or not.
     # @details The main difference here is that this method does not try to fix
     # if the compilation fail. It just call the make and return if the make is
     # successful or not.
-    # The compilation logs are printed on the output and logged in the
-    # stdout.log file prefixed with the time in the format:
+    # The compilation logs are logged in the stdout.log file prefixed with the
+    # time in the format:
     # [00:00:00] make: Entering directory '/TuxML/linux-4.13.3'
     # [00:00:00] scripts/kconfig/conf  --silentoldconfig Kconfig
     # [00:00:01]   SYSTBL  arch/x86/entry/syscalls/../../include/generated/asm/syscalls_32.h
@@ -250,16 +266,25 @@ class Compiler:
         popen = subprocess.Popen(
             ["make", "-C", self.__kernel_path, "-j{}".format(self.__nb_core)],
             stdout=subprocess.PIPE,
-            stderr=self.__logger.get_stderr_pipe(),
+            stderr=subprocess.PIPE,
             universal_newlines=True
         )
-        for line in iter(popen.stdout.readline, ""):
+        # Logging of stdout is made in another thread while logging of stderr is
+        # made in this thread
+        tout = threading.Thread(target=self.__log_output,
+                                args=(popen.stdout,
+                                      self.__logger.get_stdout_pipe(), 
+                                      start_compilation_timer))
+        tout.deamon = True
+        tout.start()
+        for line in iter(popen.stderr.readline, ""):
             now = time.time() - start_compilation_timer;
             now_f = time.strftime("[%H:%M:%S] ", time.gmtime(now))
-            print(now_f + line, end="", file=self.__logger.get_stdout_pipe())
-            self.__logger.timed_print_output(line, end="")
-        popen.stdout.close()
+            print(now_f + line, end="", file=self.__logger.get_stderr_pipe())
         failure = popen.wait()
+        popen.stdout.close()
+        popen.stderr.close()
+        tout.join()
         if not failure:
             self.__logger.timed_print_output(
                 "Compilation successful.",
