@@ -6,3 +6,6 @@ __pycache__
 LOGS
 /Documentation/doc
 /Documentation/sourcedoc
+
+# Visual Studio Code
+*.code-workspace
