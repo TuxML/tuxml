@@ -101,7 +101,7 @@ def create_sub_image_tuxml_compressed(NameContent, tmp_location):
     elif NameContent == NAME_IMAGE_2:
         MyNameContent = CONTENT_BASE_IMAGE_2
         MyNameBaseImage = NAME_BASE_IMAGE_2
-    else :
+    elif NameContent == NAME_IMAGE_3 :
         MyNameContent = CONTENT_BASE_IMAGE_3
         MyNameBaseImage = NAME_BASE_IMAGE_3
     if os.path.abspath(tmp_location) != os.path.dirname(
@@ -162,7 +162,7 @@ def create_image_tuxml_compressed(NameContent ,tmp_location, tag=None, dependenc
     elif NameContent == NAME_IMAGE_2:
         MyNameContent = CONTENT_IMAGE_2
         MyNameImage = NAME_IMAGE_2
-    else :
+    elif NameContent == NAME_IMAGE_3:
         MyNameContent = CONTENT_IMAGE_3
         MyNameImage = NAME_IMAGE_3
 
@@ -215,27 +215,27 @@ def create_big_image_tuxml_uncompressed(NameContent, tmp_location, tag=None):
     elif NameContent == NAME_IMAGE_2:
         MyNameContent = CONTENT_BIG_IMAGE_2
         MyBigImage = NAME_BIG_IMAGE_2
-    else :
+    elif NameContent == NAME_IMAGE_3 :
         MyNameContent = CONTENT_BIG_IMAGE_3
         MyBigImage = NAME_BIG_IMAGE_3
-        
-        content = "{}".format(MyNameContent['PREVIMG_VERSION'])
-        if tag is not None:
-            content = "{}:{}".format(content, tag)
-        content = "{}\n{}\n{}\n{}\n{}".format(
-            content,
-            MyNameContent['TUXML_UNTAR'],
-            MyNameContent['LINUX_UNTAR'],
-            MyNameContent['RUN_DEP_FILE'],
-            MyNameContent['DEV']
-        )
-        create_dockerfile(content=content, path=tmp_location)
-        docker_build(
-            image=MyBigImage,
-            tag=tag,
-            path=tmp_location
-        )
-        os.remove("{}/Dockerfile".format(tmp_location))
+    
+    content = "{}".format(MyNameContent['PREVIMG_VERSION'])
+    if tag is not None:
+        content = "{}:{}".format(content, tag)
+    content = "{}\n{}\n{}\n{}\n{}".format(
+        content,
+        MyNameContent['TUXML_UNTAR'],
+        MyNameContent['LINUX_UNTAR'],
+        MyNameContent['RUN_DEP_FILE'],
+        MyNameContent['DEV']
+    )
+    create_dockerfile(content=content, path=tmp_location)
+    docker_build(
+        image=MyBigImage,
+        tag=tag,
+        path=tmp_location
+    )
+    os.remove("{}/Dockerfile".format(tmp_location))
 
 #############################################################
 #################################################
