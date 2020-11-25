@@ -7,6 +7,7 @@
 # database).
 
 import platform
+import distro
 import os
 import psutil
 import subprocess
@@ -21,8 +22,8 @@ from compilation.settings import TUXML_VERSION
 def __get_system_details():
     system = {
         "system_kernel": platform.system(),
-        "linux_distribution": platform.linux_distribution()[0],
-        "linux_distribution_version": platform.linux_distribution()[1],
+        "linux_distribution": distro.linux_distribution()[0],
+        "linux_distribution_version": distro.linux_distribution()[1],
         "system_kernel_version": platform.release()
     }
     return system
