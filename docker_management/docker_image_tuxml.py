@@ -370,6 +370,7 @@ def parser():
 if __name__ == "__main__":
     args = parser()
     listeArg = [NAME_IMAGE, NAME_IMAGE_2, NAME_IMAGE_3]
+    confirm_build = 0
 
     for i in listeArg:
         if args.push:
@@ -383,7 +384,10 @@ if __name__ == "__main__":
             elif args.full_rebuild:
                 print("Are you sure that you want to rebuild the whole docker image"
                     " project (Y/n)? ")
-                if ask_for_confirmation():
+                if confirm_build:
+                    create_sub_image_tuxml_compressed(i, args.location)
+                elif ask_for_confirmation():
+                    confirm_build = 1
                     create_sub_image_tuxml_compressed(i, args.location)
                 else:
                     print("Whole rebuild canceled.\n")
