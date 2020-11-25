@@ -3,12 +3,12 @@ LINUX_KERNEL = 'linux-4.13.3'
 ## Information about the base image
 NAME_BASE_IMAGE = "tuxml/basetuxml"
 
-BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps mcelog libcrypto++6 libssl-dev gcc-6-plugin-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu"
+BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps libcrypto++6 libssl-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu"
 
 # What will be written in the Dockerfile for the base image to produce the image.
 CONTENT_BASE_IMAGE = {
     # Constants for the Dockerfile of the "compressed" image
-    'DEBIAN_VERSION': 'FROM debian:stretch',
+    'DEBIAN_VERSION': 'FROM debian:buster',
     'MKDIR_TUXML': "RUN mkdir /TuxML /TuxML/logs",
     'LINUX_TAR': "COPY linux-4.13.3.tar.xz /TuxML/linux-4.13.3.tar.xz\n"
                  "RUN echo \"4.13.3\" > /kernel_version.txt",
@@ -25,7 +25,8 @@ CONTENT_BASE_IMAGE = {
                 "RUN rm /installBusyBox.sh",
     'ADD_DEP': "COPY dependencies_tree_fixer.py /dependencies_tree_fixer.py\n"
                "RUN ./dependencies_tree_fixer.py\n"
-               "RUN rm /dependencies_tree_fixer.py"
+               "RUN rm /dependencies_tree_fixer.py",
+    'DEV' : "RUN cat /etc/issue"
 }
 
 ## Information about the built image
@@ -38,7 +39,8 @@ CONTENT_IMAGE = {
     'TUXML_TAR': "COPY TuxML.tar.xz /TuxML/TuxML.tar.xz",
     'RUN_DEP': "",
     'RUN_DEP_FILE': "",
-    'ENV_PYTHON': 'ENV PYTHONPATH=/TuxML'
+    'ENV_PYTHON': 'ENV PYTHONPATH=/TuxML',
+    'DEV' : "RUN cat /etc/issue"
 }
 
 
@@ -47,5 +49,6 @@ CONTENT_BIG_IMAGE = {
     'PREVIMG_VERSION': "FROM " + NAME_IMAGE,
     'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
     'TUXML_UNTAR': "RUN tar xf /TuxML/TuxML.tar.xz -C /TuxML && rm /TuxML/TuxML.tar.xz",
-    'RUN_DEP_FILE': "RUN apt-get update && apt-get install -y --no-install-recommends $(cat /dependencies.txt)"
+    'RUN_DEP_FILE': "RUN apt-get update && apt-get install -y --no-install-recommends $(cat /dependencies.txt)",
+    'DEV' : "RUN cat /etc/issue"
 }

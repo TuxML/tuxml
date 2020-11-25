@@ -352,6 +352,11 @@ def parser():
         default=__DEFAULT_V4
     )
     parser.add_argument(
+        "--compiler",
+        help="Optional. Give a specific compiler version. ",
+        default="gcc6"
+    )
+    parser.add_argument(
         "--logs",
         help="Optional. Save the logs to the specified path."
     )
@@ -950,6 +955,9 @@ if __name__ == "__main__":
         tag = "dev"
     else:
         tag = "prod"
+
+    if args.compiler != "gcc6":
+        tag = tag+"-"+args.compiler
 
     # Update the image
     have_been_updated = False

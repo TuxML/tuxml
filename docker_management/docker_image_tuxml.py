@@ -105,7 +105,7 @@ def create_sub_image_tuxml_compressed(tmp_location):
             "{}/dependencies_tree_fixer.py".format(os.path.dirname(os.path.abspath(__file__))),
             "{}/dependencies_tree_fixer.py".format(tmp_location))
 
-    content = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+    content = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
         CONTENT_BASE_IMAGE['DEBIAN_VERSION'],
         CONTENT_BASE_IMAGE['MKDIR_TUXML'],
         CONTENT_BASE_IMAGE['LINUX_TAR'],
@@ -115,7 +115,8 @@ def create_sub_image_tuxml_compressed(tmp_location):
         CONTENT_BASE_IMAGE['RUN_DEP_FILE'],
         CONTENT_BASE_IMAGE['RUN_PIP'],
         CONTENT_BASE_IMAGE['CPRUN_BB'],
-        CONTENT_BASE_IMAGE['ADD_DEP']
+        CONTENT_BASE_IMAGE['ADD_DEP'],
+        CONTENT_BASE_IMAGE['DEV']
     )
     create_dockerfile(
         content=content,
@@ -151,12 +152,13 @@ def create_image_tuxml_compressed(tmp_location, tag=None, dependencies_path=None
         tmp_content['RUN_DEP'] =\
             "RUN apt-get install -qq -y --no-install-recommends --download-only {} ".format(str_dep)
         tmp_content['RUN_DEP_FILE'] = "RUN echo {} >> /dependencies.txt".format(str_dep)
-    content = "{}\n{}\n{}\n{}\n{}".format(
+    content = "{}\n{}\n{}\n{}\n{}\n{}".format(
         tmp_content['PREVIMG_VERSION'],
         tmp_content['TUXML_TAR'],
         tmp_content['RUN_DEP'],
         tmp_content['RUN_DEP_FILE'],
-        tmp_content['ENV_PYTHON']
+        tmp_content['ENV_PYTHON'],
+        tmp_content['DEV']
     )
     create_dockerfile(
         content=content,
@@ -180,11 +182,12 @@ def create_big_image_tuxml_uncompressed(tmp_location, tag=None):
     content = "{}".format(CONTENT_BIG_IMAGE['PREVIMG_VERSION'])
     if tag is not None:
         content = "{}:{}".format(content, tag)
-    content = "{}\n{}\n{}\n{}".format(
+    content = "{}\n{}\n{}\n{}\n{}".format(
         content,
         CONTENT_BIG_IMAGE['TUXML_UNTAR'],
         CONTENT_BIG_IMAGE['LINUX_UNTAR'],
-        CONTENT_BIG_IMAGE['RUN_DEP_FILE']
+        CONTENT_BIG_IMAGE['RUN_DEP_FILE'],
+        CONTENT_BIG_IMAGE['DEV']
     )
     create_dockerfile(content=content, path=tmp_location)
     docker_build(
