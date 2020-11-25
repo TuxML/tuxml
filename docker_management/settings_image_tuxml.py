@@ -29,10 +29,21 @@ CONTENT_BASE_IMAGE = {
 }
 
 ## Information about the built image
-NAME_IMAGE = "tuxml/tartuxml"
+NAME_IMAGE_1 = "tuxml/tartuxml"
+NAME_IMAGE_2 = "tuxml/tartuxml"
+NAME_IMAGE_3 = "tuxml/tartuxml"
 
 # What will be written in the Dockerfile for the compressed docker image.
-CONTENT_IMAGE = {
+CONTENT_IMAGE_1 = {
+    # Constants for the Dockerfile of the "uncompressed" image
+    'PREVIMG_VERSION': "FROM " + NAME_BASE_IMAGE,
+    'TUXML_TAR': "COPY TuxML.tar.xz /TuxML/TuxML.tar.xz",
+    'RUN_DEP': "",
+    'RUN_DEP_FILE': "",
+    'ENV_PYTHON': 'ENV PYTHONPATH=/TuxML'
+}
+
+CONTENT_IMAGE_2 = {
     # Constants for the Dockerfile of the "uncompressed" image
     'PREVIMG_VERSION': "FROM " + NAME_BASE_IMAGE,
     'TUXML_TAR': "COPY TuxML.tar.xz /TuxML/TuxML.tar.xz",
@@ -42,9 +53,20 @@ CONTENT_IMAGE = {
 }
 
 
-NAME_BIG_IMAGE = "tuxml/tuxml"
-CONTENT_BIG_IMAGE = {
-    'PREVIMG_VERSION': "FROM " + NAME_IMAGE,
+NAME_BIG_IMAGE_1 = "tuxml/tuxml"
+CONTENT_BIG_IMAGE_1 = {
+    'PREVIMG_VERSION': "FROM " + NAME_IMAGE_1,
+    'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
+    'TUXML_UNTAR': "RUN tar xf /TuxML/TuxML.tar.xz -C /TuxML && rm /TuxML/TuxML.tar.xz",
+    'RUN_DEP_FILE': "RUN apt-get update && apt-get install -y --no-install-recommends $(cat /dependencies.txt)\n"
+                    "RUN echo deb http://deb.debian.org/debian testing main >> /etc/apt/sources.list\n"
+                    "RUN apt-get -y update\n"
+                    "RUN apt-get install -y gcc-7 g++-7"
+}
+
+NAME_BIG_IMAGE_2 = "tuxml/tuxml2"
+CONTENT_BIG_IMAGE_2 = {
+    'PREVIMG_VERSION': "FROM " + NAME_IMAGE_2,
     'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
     'TUXML_UNTAR': "RUN tar xf /TuxML/TuxML.tar.xz -C /TuxML && rm /TuxML/TuxML.tar.xz",
     'RUN_DEP_FILE': "RUN apt-get update && apt-get install -y --no-install-recommends $(cat /dependencies.txt)"
