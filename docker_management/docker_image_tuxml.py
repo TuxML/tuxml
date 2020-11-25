@@ -130,6 +130,59 @@ def create_sub_image_tuxml_compressed(tmp_location):
         os.remove("{}/init".format(tmp_location))
         os.remove("{}/dependencies_tree_fixer.py".format(tmp_location))
 
+#################################################
+# 2
+#################################################
+## create_sub_image_tuxml_compressed
+# @author PICARD Michaël
+# @version 1
+# @brief Create a base image to speed our usual build
+# @details It create an image on which we will build the image to upload. Its
+# goal is to speed up the creation context when we just update project's files,
+# and not the whole dependencies for our project.
+def create_sub_image_tuxml_compressed_2(tmp_location):
+    get_linux_kernel(LINUX_KERNEL, tmp_location)
+    # we need to ensure that the Dockerfile, installBusyBox.sh and init are in
+    # the same directory
+    # same for dependencies_tree_fixer.py
+    if os.path.abspath(tmp_location) != os.path.dirname(
+            os.path.abspath(__file__)):
+        shutil.copy2(
+            "{}/installBusyBox.sh".format(
+                os.path.dirname(os.path.abspath(__file__))),
+            "{}/installBusyBox.sh".format(tmp_location))
+        shutil.copy2(
+            "{}/init".format(os.path.dirname(os.path.abspath(__file__))),
+            "{}/init".format(tmp_location))
+        shutil.copy2(
+            "{}/dependencies_tree_fixer.py".format(os.path.dirname(os.path.abspath(__file__))),
+            "{}/dependencies_tree_fixer.py".format(tmp_location))
+
+    content = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+        CONTENT_BASE_IMAGE_2['DEBIAN_VERSION'],
+        CONTENT_BASE_IMAGE_2['MKDIR_TUXML'],
+        CONTENT_BASE_IMAGE_2['LINUX_TAR'],
+        CONTENT_BASE_IMAGE_2['ENV_VARS'],
+        CONTENT_BASE_IMAGE_2['ZONEINFO'],
+        CONTENT_BASE_IMAGE_2['RUN_DEP'],
+        CONTENT_BASE_IMAGE_2['RUN_DEP_FILE'],
+        CONTENT_BASE_IMAGE_2['RUN_PIP'],
+        CONTENT_BASE_IMAGE_2['CPRUN_BB'],
+        CONTENT_BASE_IMAGE_2['ADD_DEP'],
+        CONTENT_BASE_IMAGE_2['DEV']
+    )
+    create_dockerfile(
+        content=content,
+        path=tmp_location)
+    docker_build(
+        image=NAME_BASE_IMAGE_2,
+        path=tmp_location)
+
+    if os.path.abspath(tmp_location) != os.path.dirname(os.path.abspath(__file__)):
+        os.remove("{}/installBusyBox.sh".format(tmp_location))
+        os.remove("{}/init".format(tmp_location))
+        os.remove("{}/dependencies_tree_fixer.py".format(tmp_location))
+#################################################
 
 ## create_image_tuxml_compressed
 # @author PICARD Michaël
@@ -169,6 +222,48 @@ def create_image_tuxml_compressed(tmp_location, tag=None, dependencies_path=None
         path=tmp_location)
     os.remove("{}/TuxML.tar.xz".format(tmp_location))
 
+#####################################################################################
+# 2
+#####################################################################################
+## create_image_tuxml_compressed
+# @author PICARD Michaël
+# @version 1
+# @brief Create the compressed image to work with.
+# @param tmp_location Where we create and build the image.
+# @param tag The tag of the built image. Default to None.
+# @param dependencies_path The path to the file corresponding to optional
+# dependencies. Default to None.
+def create_image_tuxml_compressed_2(tmp_location, tag=None, dependencies_path=None):
+    tmp_content = CONTENT_IMAGE_2
+    if dependencies_path is not None:
+        with open(dependencies_path) as dep_file:
+            str_dep = ''
+            tmp = dep_file.readline()
+            while tmp != '':
+                str_dep += tmp + " "
+                tmp = dep_file.readline()
+            str_dep = str_dep.replace("\n", "")
+        tmp_content['RUN_DEP'] =\
+            "RUN apt-get install -qq -y --no-install-recommends --download-only {} ".format(str_dep)
+        tmp_content['RUN_DEP_FILE'] = "RUN echo {} >> /dependencies.txt".format(str_dep)
+    content = "{}\n{}\n{}\n{}\n{}\n{}".format(
+        tmp_content['PREVIMG_VERSION'],
+        tmp_content['TUXML_TAR'],
+        tmp_content['RUN_DEP'],
+        tmp_content['RUN_DEP_FILE'],
+        tmp_content['ENV_PYTHON'],
+        tmp_content['DEV']
+    )
+    create_dockerfile(
+        content=content,
+        path=tmp_location)
+    docker_build(
+        image=NAME_IMAGE_2,
+        tag=tag,
+        path=tmp_location)
+    os.remove("{}/TuxML.tar.xz".format(tmp_location))
+#####################################################################################
+
 
 ## create_big_image_tuxml_uncompressed
 # @author PICARD Michaël
@@ -197,6 +292,37 @@ def create_big_image_tuxml_uncompressed(tmp_location, tag=None):
     )
     os.remove("{}/Dockerfile".format(tmp_location))
 
+#############################################################
+# 2
+#############################################################
+## create_big_image_tuxml_uncompressed
+# @author PICARD Michaël
+# @version 1
+# @brief Create the uncompressed image to work with.
+# @param tmp_location Where we create and build the image.
+# @param tag The tag of the built image. Default to None.
+# @param dependencies_path The path to the file corresponding to optional
+# dependencies. Default to None.
+def create_big_image_tuxml_uncompressed_2(tmp_location, tag=None):
+    content = "{}".format(CONTENT_BIG_IMAGE_2['PREVIMG_VERSION'])
+    if tag is not None:
+        content = "{}:{}".format(content, tag)
+    content = "{}\n{}\n{}\n{}\n{}".format(
+        content,
+        CONTENT_BIG_IMAGE_2['TUXML_UNTAR'],
+        CONTENT_BIG_IMAGE_2['LINUX_UNTAR'],
+        CONTENT_BIG_IMAGE_2['RUN_DEP_FILE'],
+        CONTENT_BIG_IMAGE_2['DEV']
+    )
+    create_dockerfile(content=content, path=tmp_location)
+    docker_build(
+        image=NAME_BIG_IMAGE_2,
+        tag=tag,
+        path=tmp_location
+    )
+    os.remove("{}/Dockerfile".format(tmp_location))
+#############################################################
+
 
 ## exist_sub_image_tuxml_compressed
 # @author PICARD Michaël
@@ -214,6 +340,27 @@ def exist_sub_image_tuxml_compressed():
         stdout=subprocess.DEVNULL
     )
     return returncode == 0
+
+############################################################
+# 2
+############################################################
+## exist_sub_image_tuxml_compressed
+# @author PICARD Michaël
+# @version 1
+# @brief Test if the sub_image_tuxml_compressed docker image already exist.
+# @return Boolean
+def exist_sub_image_tuxml_compressed_2():
+    cmd = "docker image ls --format {{.Repository}} | grep"
+    cmd = "{} {}".format(cmd, NAME_BASE_IMAGE_2)
+    # mpicard: grep return 0 if a line is found, 1 is no line found and 2 or
+    # greater if an error occured. So we just check it.
+    returncode = subprocess.call(
+        args=cmd,
+        shell=True,
+        stdout=subprocess.DEVNULL
+    )
+    return returncode == 0
+############################################################
 
 
 ##get_linux_kernel
@@ -346,3 +493,24 @@ if __name__ == "__main__":
         # check kernel_generator.py:docker_image_auto_cleaner for more.
         create_image_tuxml_compressed(args.location, args.tag, args.dependencies)
         create_big_image_tuxml_uncompressed(args.location, tag=args.tag)
+
+    if args.push:
+        docker_push(NAME_IMAGE_2, args.tag)
+    elif args.update:
+        docker_pull(NAME_IMAGE_2, args.tag)
+        create_big_image_tuxml_uncompressed_2(args.location, tag=args.tag)
+    else:
+        if not exist_sub_image_tuxml_compressed_2():
+            create_sub_image_tuxml_compressed_2(args.location)
+        elif args.full_rebuild:
+            print("Are you sure that you want to rebuild the whole docker image"
+                  " project (Y/n)? ")
+            if ask_for_confirmation():
+                create_sub_image_tuxml_compressed_2(args.location)
+            else:
+                print("Whole rebuild canceled.\n")
+        create_tuxml_archive(args.location)
+        # TODO: Removing of old image, in order to have a clean docker image registry
+        # check kernel_generator.py:docker_image_auto_cleaner for more.
+        create_image_tuxml_compressed_2(args.location, args.tag, args.dependencies)
+        create_big_image_tuxml_uncompressed_2(args.location, tag=args.tag)
