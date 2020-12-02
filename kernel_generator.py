@@ -957,7 +957,12 @@ if __name__ == "__main__":
         tag = "prod"
 
     if args.compiler != "gcc6":
-        tag = tag+"-"+args.compiler
+        if args.compiler == "gcc8":
+            __COMPRESSED_IMAGE = "tuxml/tartuxml2"
+            __IMAGE = "tuxml/tuxml2"
+        elif args.compiler == "gcc10":
+            __COMPRESSED_IMAGE = "tuxml/tartuxml3"
+            __IMAGE = "tuxml/tuxml3"
 
     # Update the image
     have_been_updated = False
