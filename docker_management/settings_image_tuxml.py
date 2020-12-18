@@ -1,7 +1,7 @@
 LINUX_KERNEL = 'linux-4.13.3'
 
 ## Information about the base image
-NAME_BASE_IMAGE = "tuxml/basetuxml"
+NAME_BASE_IMAGE = "tuxml/basetuxml-gcc6"
 
 BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps libcrypto++6 libssl-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu python3-distro"
 
@@ -30,7 +30,7 @@ CONTENT_BASE_IMAGE = {
 }
 
 ## Information about the built image
-NAME_IMAGE = "tuxml/tartuxml"
+NAME_IMAGE = "tuxml/tartuxml-gcc6"
 
 # What will be written in the Dockerfile for the compressed docker image.
 CONTENT_IMAGE = {
@@ -44,7 +44,7 @@ CONTENT_IMAGE = {
 }
 
 
-NAME_BIG_IMAGE = "tuxml/tuxml"
+NAME_BIG_IMAGE = "tuxml/tuxml-gcc6"
 CONTENT_BIG_IMAGE = {
     'PREVIMG_VERSION': "FROM " + NAME_IMAGE,
     'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
@@ -59,7 +59,7 @@ CONTENT_BIG_IMAGE = {
 
 
 ## Information about the base image
-NAME_BASE_IMAGE_2 = "tuxml/basetuxml2"
+NAME_BASE_IMAGE_2 = "tuxml/basetuxml-gcc8"
 
 # What will be written in the Dockerfile for the base image to produce the image.
 CONTENT_BASE_IMAGE_2 = {
@@ -86,7 +86,7 @@ CONTENT_BASE_IMAGE_2 = {
 }
 
 ## Information about the built image
-NAME_IMAGE_2 = "tuxml/tartuxml2"
+NAME_IMAGE_2 = "tuxml/tartuxml-gcc8"
 
 # What will be written in the Dockerfile for the compressed docker image.
 CONTENT_IMAGE_2 = {
@@ -100,7 +100,7 @@ CONTENT_IMAGE_2 = {
 }
 
 
-NAME_BIG_IMAGE_2 = "tuxml/tuxml2"
+NAME_BIG_IMAGE_2 = "tuxml/tuxml-gcc8"
 CONTENT_BIG_IMAGE_2 = {
     'PREVIMG_VERSION': "FROM " + NAME_IMAGE_2,
     'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
@@ -116,12 +116,12 @@ CONTENT_BIG_IMAGE_2 = {
 
 
 ## Information about the base image
-NAME_BASE_IMAGE_3 = "tuxml/basetuxml3"
+NAME_BASE_IMAGE_3 = "tuxml/basetuxml-gcc10"
 
 # What will be written in the Dockerfile for the base image to produce the image.
 CONTENT_BASE_IMAGE_3 = {
     # Constants for the Dockerfile of the "compressed" image
-    'DEBIAN_VERSION': 'FROM debian:buster',
+    'DEBIAN_VERSION': 'FROM debian:bullseye',
     'MKDIR_TUXML': "RUN mkdir /TuxML /TuxML/logs",
     'LINUX_TAR': "COPY linux-4.13.3.tar.xz /TuxML/linux-4.13.3.tar.xz\n"
                  "RUN echo \"4.13.3\" > /kernel_version.txt",
@@ -143,7 +143,7 @@ CONTENT_BASE_IMAGE_3 = {
 }
 
 ## Information about the built image
-NAME_IMAGE_3 = "tuxml/tartuxml3"
+NAME_IMAGE_3 = "tuxml/tartuxml-gcc10"
 
 # What will be written in the Dockerfile for the compressed docker image.
 CONTENT_IMAGE_3 = {
@@ -157,7 +157,7 @@ CONTENT_IMAGE_3 = {
 }
 
 
-NAME_BIG_IMAGE_3 = "tuxml/tuxml3"
+NAME_BIG_IMAGE_3 = "tuxml/tuxml-gcc10"
 CONTENT_BIG_IMAGE_3 = {
     'PREVIMG_VERSION': "FROM " + NAME_IMAGE_3,
     'LINUX_UNTAR': "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz",
