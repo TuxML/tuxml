@@ -10,8 +10,8 @@ import subprocess
 import os
 import shutil
 
-__COMPRESSED_IMAGE = "tuxml/tartuxml"
-__IMAGE = "tuxml/tuxml"
+__COMPRESSED_IMAGE = "tuxml/tartuxml-gcc6"
+__IMAGE = "tuxml/tuxml-gcc6"
 __DEFAULT_V4 = "4.13.3"
 # __sudo_right: internal global variable whose goal is to use sudo if the user
 # isn't in the docker group.
@@ -350,6 +350,11 @@ def parser():
              "after compiling, and that the image use to compile it will be "
              "deleted afterward.",
         default=__DEFAULT_V4
+    )
+    parser.add_argument(
+        "--compiler",
+        help="Optional. Give a specific compiler version. ",
+        default="gcc6"
     )
     parser.add_argument(
         "--logs",
@@ -950,6 +955,14 @@ if __name__ == "__main__":
         tag = "dev"
     else:
         tag = "prod"
+
+    if args.compiler != "gcc6":
+        if args.compiler == "gcc8":
+            __COMPRESSED_IMAGE = "tuxml/tartuxml-gcc8"
+            __IMAGE = "tuxml/tuxml-gcc8"
+        elif args.compiler == "gcc10":
+            __COMPRESSED_IMAGE = "tuxml/tartuxml-gcc10"
+            __IMAGE = "tuxml/tuxml-gcc10"
 
     # Update the image
     have_been_updated = False
