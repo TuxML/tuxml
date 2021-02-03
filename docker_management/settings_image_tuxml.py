@@ -3,7 +3,7 @@ LINUX_KERNEL = 'linux-4.13.3'
 ## Information about the base image
 NAME_BASE_IMAGE = "tuxml/basetuxml-gcc6"
 
-BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps libcrypto++6 libssl-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu python3-distro"
+BASIC_DEP = "gcc g++ make binutils util-linux kmod e2fsprogs jfsutils xfsprogs btrfs-progs pcmciautils ppp grub iptables openssl bc reiserfsprogs squashfs-tools quotatool nfs-kernel-server procps libssl-dev wget qemu-system qemu-utils initramfs-tools lzop liblz4-tool dialog moreutils bison libelf-dev flex libdb5.3-dev qemu python3-distro"
 
 # What will be written in the Dockerfile for the base image to produce the image.
 CONTENT_BASE_IMAGE = {
