@@ -45,6 +45,20 @@ more](https://github.com/TuxML/ProjetIrma/wiki/User_documentation#python-script-
 For a more up-to-date version of TUXML, please consider the **dev
 branch**
 
+
+### Build, Docker images
+
+```
+git clone https://github.com/TuxML/tuxml 
+cd tuxml 
+cd docker_management 
+python3 docker_image_tuxml.py -f
+docker images 
+cd ..
+python3 kernel_generator --dev 1 --linux_version 5.8 --tiny
+``` 
+https://gitlab.inria.fr/diverse/docker/container_registry 
+
 ## I want to know more about the project!
 
 Please check our [wiki](https://github.com/TuxML/ProjetIrma/wiki).
