@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import bz2
+import json
 
 from compilation.environment import get_environment_details, print_environment_details
 from compilation.configuration import create_configuration, print_configuration
@@ -245,11 +246,34 @@ def run(boot, check_size, logger, configuration, environment,
         boot_result,
     )
 
+    creation_fichier_json(
+        compilation_result1 = compilation_result['compilation_date'],
+        compilation_result2 = compilation_result['compilation_time'],
+        compilation_result3 = compilation_result['compiled_kernel_size'],
+        compilation_result4 = compilation_result['compiled_kernel_version'],
+        
+    )
     archive_log(cid)
 
     return cid
 
 
+def creation_fichier_json(compilation_result1, compilation_result2, compilation_result3, compilation_result4) :
+
+    myJsonStruct = {
+         'compilation_date' : compilation_result1,
+         'compilation_time' : compilation_result2,
+         'compiled_kernel_size' : compilation_result3,
+         'compiled_kernel_version' : compilation_result4,
+        
+    }
+
+    with open('Json.json', 'w') as json_file:
+        myJson = json.dump(myJsonStruct, json_file)
+
+
+    
+    
 ## archive_log
 # @author PICARD Michaël
 # @version 1

@@ -889,6 +889,7 @@ def compilation(image, args):
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
+        get_Json(container_id)
         delete_docker_container(container_id)
     if not args.silent:
         feedback_user(nbcontainer, args.incremental)
@@ -945,6 +946,10 @@ def fetch_logs(container_id, directory, silent=False):
     if not silent:
         print("Done", flush=True)
 
+def get_Json(container_id):
+    print("je recupere le json")
+    cmd = "{}docker cp {}:Json.json Json/{}.json".format(__sudo_right, container_id, container_id)
+    subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL)
 
 if __name__ == "__main__":
     args = parser()
