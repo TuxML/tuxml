@@ -256,6 +256,7 @@ def run(boot, check_size, logger, configuration, environment,
             compilation_result2 = compilation_result['compilation_time'],
             compilation_result3 = compilation_result['compiled_kernel_size'],
             compilation_result4 = compilation_result['compiled_kernel_version'],
+            gcc_version = environment["software"]["gcc_version"],
             
         )
     else :
@@ -265,6 +266,7 @@ def run(boot, check_size, logger, configuration, environment,
             compilation_result2 = compilation_result['compilation_time'],
             compilation_result3 = compilation_result['compiled_kernel_size'],
             compilation_result4 = compilation_result['compiled_kernel_version'],
+            gcc_version = environment["software"]["gcc_version"],
         )    
 
     
@@ -272,7 +274,7 @@ def run(boot, check_size, logger, configuration, environment,
     return cid
 
 
-def creation_fichier_json(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4) :
+def creation_fichier_json(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, gcc_version) :
 
     myJsonStruct = {
          'cid' : cid,
@@ -280,6 +282,7 @@ def creation_fichier_json(cid, compilation_result1, compilation_result2, compila
          'compilation_time' : compilation_result2,
          'compiled_kernel_size' : compilation_result3,
          'compiled_kernel_version' : compilation_result4,
+         'gcc_version' : gcc_version,
         
     }
 
