@@ -238,26 +238,26 @@ def run(boot, check_size, logger, configuration, environment,
 
     cid = 0
     try :
-    cid = insert_result_into_database(
-        logger,
-        compilation_result,
-        environment['hardware'],
-        environment['software'],
-        size_result,
-        cid_before,
-        boot_result,
-    )
+        cid = insert_result_into_database(
+            logger,
+            compilation_result,
+            environment['hardware'],
+            environment['software'],
+            size_result,
+            cid_before,
+            boot_result,
+        )
         archive_log(cid)
 
     except : 
-    creation_fichier_json(
-            cid = 0,
-        compilation_result1 = compilation_result['compilation_date'],
-        compilation_result2 = compilation_result['compilation_time'],
-        compilation_result3 = compilation_result['compiled_kernel_size'],
-        compilation_result4 = compilation_result['compiled_kernel_version'],
-        
-    )
+        creation_fichier_json(
+                cid = 0,
+            compilation_result1 = compilation_result['compilation_date'],
+            compilation_result2 = compilation_result['compilation_time'],
+            compilation_result3 = compilation_result['compiled_kernel_size'],
+            compilation_result4 = compilation_result['compiled_kernel_version'],
+            
+        )
     else :
         creation_fichier_json(
             cid = cid,
