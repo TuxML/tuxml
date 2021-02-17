@@ -739,7 +739,7 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
     """
     # Starting the container
     container_id = subprocess.check_output(
-        args="{}docker run -i -v ~/Documents/tuxml/compilation:/TuxML/compilation -d {}".format(__sudo_right, image),
+        args="{}docker run -i -v compilation:/TuxML/compilation -d {}".format(__sudo_right, image),
         shell=True
     ).decode('UTF-8')
     container_id = container_id.split("\n")[0]
