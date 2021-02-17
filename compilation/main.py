@@ -236,6 +236,8 @@ def run(boot, check_size, logger, configuration, environment,
         else:
             logger.reset_boot_pipe()
 
+    cid = 0
+    try :
     cid = insert_result_into_database(
         logger,
         compilation_result,
@@ -245,22 +247,35 @@ def run(boot, check_size, logger, configuration, environment,
         cid_before,
         boot_result,
     )
+        archive_log(cid)
 
+    except : 
     creation_fichier_json(
+            cid = 0,
         compilation_result1 = compilation_result['compilation_date'],
         compilation_result2 = compilation_result['compilation_time'],
         compilation_result3 = compilation_result['compiled_kernel_size'],
         compilation_result4 = compilation_result['compiled_kernel_version'],
         
     )
-    archive_log(cid)
+    else :
+        creation_fichier_json(
+            cid = cid,
+            compilation_result1 = compilation_result['compilation_date'],
+            compilation_result2 = compilation_result['compilation_time'],
+            compilation_result3 = compilation_result['compiled_kernel_size'],
+            compilation_result4 = compilation_result['compiled_kernel_version'],
+        )    
+
+    
 
     return cid
 
 
-def creation_fichier_json(compilation_result1, compilation_result2, compilation_result3, compilation_result4) :
+def creation_fichier_json(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4) :
 
     myJsonStruct = {
+         'cid' : cid,
          'compilation_date' : compilation_result1,
          'compilation_time' : compilation_result2,
          'compiled_kernel_size' : compilation_result3,

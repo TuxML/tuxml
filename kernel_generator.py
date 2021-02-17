@@ -947,7 +947,6 @@ def fetch_logs(container_id, directory, silent=False):
         print("Done", flush=True)
 
 def get_Json(container_id):
-    print("je recupere le json")
     cmd = "{}docker cp {}:Json.json Json/{}.json".format(__sudo_right, container_id, container_id)
     subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL)
 
