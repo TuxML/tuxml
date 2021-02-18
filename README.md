@@ -40,7 +40,7 @@ results to our database.  You can modify the 1 parameter to any other
 number (it's the number of kernels your machine will compile).  The
 python script gives you some other options that you can use, see [this
 page for
-more](https://github.com/TuxML/ProjetIrma/wiki/User_documentation#python-script-entry-point--kernel_generatorpy).
+more](https://github.com/TuxML/tuxml/wiki/User_documentation#python-script-entry-point--kernel_generatorpy).
 
 For a more up-to-date version of TUXML, please consider the **dev
 branch**
@@ -61,7 +61,7 @@ https://gitlab.inria.fr/diverse/docker/container_registry
 
 ## I want to know more about the project!
 
-Please check our [wiki](https://github.com/TuxML/ProjetIrma/wiki).
+Please check our [wiki](https://github.com/TuxML/tuxml/wiki).
 
 ## Contributors' list
 
