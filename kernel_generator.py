@@ -381,6 +381,12 @@ def parser():
              "Useful if your computer can't handle the process at full power.",
         type=int
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Optional. Return a json which contain importants informations."
+    )
+
 
     return parser.parse_args()
 
@@ -713,7 +719,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, seed,
-                           silent, cpu_cores, boot, check_size):
+                           silent, cpu_cores, boot, check_size, json):
     """Run a docker container to compiler a Linux kernel
 
     :param image: docker image
@@ -773,12 +779,16 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
         boot = "--boot"
     else:
         boot = ""
+    if json :
+        json = "--json"
+    else:
+        json = ""
     if check_size:
         check_size = "--check_size"
     else:
         check_size = ""
     subprocess.call(
-        args="{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {}| ts -s'".format(
+        args="{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {}| ts -s'".format(
             __sudo_right,
             container_id,
             incremental,
@@ -786,7 +796,8 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             silent,
             cpu_cores,
             boot,
-            check_size
+            check_size,
+            json
         ),
         shell=True
     )
@@ -885,7 +896,8 @@ def compilation(image, args):
             args.silent,
             args.number_cpu,
             args.boot,
-            args.checksize
+            args.checksize,
+            args.json
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
@@ -953,7 +965,7 @@ def get_Json(container_id):
 if __name__ == "__main__":
     args = parser()
     check_precondition_and_warning(args)
-
+    
     # Set the image tag to use.
     if args.dev:
         tag = "dev"

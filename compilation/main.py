@@ -77,6 +77,11 @@ def parser():
         help="Optional. Compute additional size measurements on the kernel and send "
              "the results to the 'sizes' table (can be heavy)."
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="create a json which has importants informations."
+    )
     return parser.parse_args()
 
 
@@ -182,7 +187,7 @@ def retrieve_sizes(path, kernel_version):
 # it should be called multiple time for multiple compilation.
 def run(boot, check_size, logger, configuration, environment,
         package_manager, tiny=False, config_file=None,
-        cid_before=None):
+        cid_before=None, json=False):
     """Do all the tests, from compilation to sending the results to the
     database.
 
@@ -219,7 +224,7 @@ def run(boot, check_size, logger, configuration, environment,
         kernel_path=configuration['kernel_path'],
         kernel_version=configuration['kernel_version_compilation'],
         tiny=tiny,
-        config_file=config_file
+        config_file=config_file,
     )
     compiler.run()
     compilation_result = compiler.get_compilation_dictionary()
@@ -250,38 +255,28 @@ def run(boot, check_size, logger, configuration, environment,
         archive_log(cid)
 
     except : 
-        print("error sending log to database")
-        creation_fichier_json(
-                cid = 0,
-            compilation_result1 = compilation_result['compilation_date'],
-            compilation_result2 = compilation_result['compilation_time'],
-            compilation_result3 = compilation_result['compiled_kernel_size'],
-            compilation_result4 = compilation_result['compiled_kernel_version'],
-            gcc_version = environment["software"]["gcc_version"],
-            tiny=tiny,
-            config_file = config_file,
-            boot=boot,
-            
-        )
+        if json :
+            print("error sending log to database")
     else :
-        creation_fichier_json(
-            cid = cid,
-            compilation_result1 = compilation_result['compilation_date'],
-            compilation_result2 = compilation_result['compilation_time'],
-            compilation_result3 = compilation_result['compiled_kernel_size'],
-            compilation_result4 = compilation_result['compiled_kernel_version'],
-            gcc_version = environment["software"]["gcc_version"],
-            tiny=tiny,
-            config_file=config_file,
-            boot=boot,
-        )    
+        if json :
+            cid = cid
 
-    
+    json_file_creation(
+                cid = cid,
+                compilation_result1 = compilation_result['compilation_date'],
+                compilation_result2 = compilation_result['compilation_time'],
+                compilation_result3 = compilation_result['compiled_kernel_size'],
+                compilation_result4 = compilation_result['compiled_kernel_version'],
+                gcc_version = environment["software"]["gcc_version"],
+                tiny=tiny,
+                config_file=config_file,
+                boot=boot,
+            )    
 
     return cid
 
 
-def creation_fichier_json(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, gcc_version, tiny, config_file, boot) :
+def json_file_creation(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, gcc_version, tiny, config_file, boot) :
 
     myJsonStruct = {
          'cid' : cid,
@@ -383,7 +378,8 @@ if __name__ == "__main__":
         environment=environment,
         package_manager=package_manager,
         tiny=args.tiny,
-        config_file=args.config
+        config_file=args.config,
+        json=args.json
     )
 
     # Cleaning the container
