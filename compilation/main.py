@@ -82,6 +82,12 @@ def parser():
         action="store_true",
         help="create a json which has importants informations."
     )
+    parser.add_argument(
+        "--mount_host_dev",
+        action="store_true",
+        help="create a json which has importants informations."
+    )
+    
     return parser.parse_args()
 
 

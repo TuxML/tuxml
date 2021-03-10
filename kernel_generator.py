@@ -18,7 +18,7 @@ __DEFAULT_V4 = "4.13.3"
 __sudo_right = ""
 
 
-## set_prompt_color
+# set_prompt_color
 # @author PICARD Michaël
 # @version 1
 # @brief Set the prompt output color. By default, it reset it to the default
@@ -70,7 +70,7 @@ def set_prompt_color(color="Default"):
         raise KeyError("Unknown color.")
 
 
-## ask_for_confirmation
+# ask_for_confirmation
 # @author POLES Malo, PICARD Michaël
 # @version 2
 # @brief Ask a confirmation, and return the answer as boolean
@@ -88,7 +88,7 @@ def ask_for_confirmation():
     return answer == 'y'
 
 
-## get_digest_docker_image
+# get_digest_docker_image
 # @author PICARD Michaël
 # @version 2
 # @brief Return the digest of selected docker image
@@ -126,7 +126,7 @@ def get_digest_docker_image(image, tag=None):
     return result[1]
 
 
-## get_id_docker_image
+# get_id_docker_image
 # @author PICARD Michaël
 # @version 2
 # @brief Return the id of selected docker image
@@ -162,7 +162,7 @@ def get_id_docker_image(image, tag=None):
     return result[1]
 
 
-## get_list_image_docker
+# get_list_image_docker
 # @author PICARD Michaël
 # @version 1
 # @brief Return a list of image corresponding to the given id.
@@ -194,7 +194,7 @@ def get_list_image_docker(id_image):
     return list_image
 
 
-## docker_build
+# docker_build
 # @author DIDOT Gwendal, PICARD Michaël
 # @version 2
 # @brief build a docker image
@@ -230,7 +230,7 @@ def docker_build(image=None, tag=None, path=None):
         subprocess.check_call(str_build, shell=True)
 
 
-## create_dockerfile
+# create_dockerfile
 # @author DIDOT Gwendal, PICARD Michaël
 # @version 2
 # @brief Create and save a Dockerfile
@@ -252,7 +252,7 @@ def create_dockerfile(content=None, path=None):
         file.write(content)
 
 
-## docker_pull
+# docker_pull
 # @author PICARD Michaël
 # @version 1
 # @brief pull a docker image
@@ -272,7 +272,7 @@ def docker_pull(image, tag=None):
     subprocess.call(args=str_pull, shell=True)
 
 
-## parser
+# parser
 # @author PICARD Michaël
 # @version 1
 # @brief Parse the commandline argument
@@ -336,7 +336,7 @@ def parser():
     )
     parser.add_argument(
         "--configs",
-        nargs="+", # if --config, need to give at least one .config
+        nargs="+",  # if --config, need to give at least one .config
         help="Give a path to specific configuration files. Incompatible wit --tiny argument."
     )
     parser.add_argument(
@@ -386,12 +386,16 @@ def parser():
         action="store_true",
         help="Optional. Return a json which contain importants informations."
     )
-
+    parser.add_argument(
+        "--mount_host_dev",
+        action="store_true",
+        help="Optional. permit us to use the local file without recreate the images"
+    )
 
     return parser.parse_args()
 
 
-## check_precondition_and_warning
+# check_precondition_and_warning
 # @author PICARD Michaël
 # @version 1
 # @brief Check the precondition over commandline argument and warn the user if
@@ -408,20 +412,21 @@ def check_precondition_and_warning(args):
     """
     # precondition
     if args.nbcontainer <= 0:
-        raise ValueError("You can't run less than 1 container for compilation.")
+        raise ValueError(
+            "You can't run less than 1 container for compilation.")
     if args.configs is not None:
-    # If we get more that 1 .config, the argument args.nbcontainer
-    # will be ignored and the number of containers to create should be
-    # as much as the number of given configuration files. Hence, the
-    # following condition should be enough:
-    # if args.nbcontainer is more than the default value
-    #    and we got more than one config file
-    #     | raise Warning("You do not need to set nbcontainer if you\
-    #     |                              give  many configuration files")
-    #     +----
-    # The default value for args.nbcontainer is 1. Even if the user
-    # does not give this argument, it will be set to 1 automatically.
-    # See parser() for more info about the arguments
+        # If we get more that 1 .config, the argument args.nbcontainer
+        # will be ignored and the number of containers to create should be
+        # as much as the number of given configuration files. Hence, the
+        # following condition should be enough:
+        # if args.nbcontainer is more than the default value
+        #    and we got more than one config file
+        #     | raise Warning("You do not need to set nbcontainer if you\
+        #     |                              give  many configuration files")
+        #     +----
+        # The default value for args.nbcontainer is 1. Even if the user
+        # does not give this argument, it will be set to 1 automatically.
+        # See parser() for more info about the arguments
         if args.nbcontainer > 1 and len(args.configs) > 1:
             raise Warning("You do not need to set nbcontainer if you\
                                         give many configuration files")
@@ -478,7 +483,7 @@ def check_precondition_and_warning(args):
     set_prompt_color()
 
 
-## docker_uncompress_image
+# docker_uncompress_image
 # @author PICARD Michaël
 # @version 1
 # @brief Uncompress the compressed image to create the big one.
@@ -494,7 +499,8 @@ def docker_uncompress_image(tag):
     content = "{}\n" \
               "RUN tar xf /TuxML/linux-4.13.3.tar.xz -C /TuxML && rm /TuxML/linux-4.13.3.tar.xz\n" \
               "RUN tar xf /TuxML/TuxML.tar.xz -C /TuxML && rm /TuxML/TuxML.tar.xz\n" \
-              "RUN apt-get update && apt-get install -qq -y --no-install-recommends $(cat /dependencies.txt)".format(content)
+              "RUN apt-get update && apt-get install -qq -y --no-install-recommends $(cat /dependencies.txt)".format(
+                  content)
     create_dockerfile(content=content, path=".")
     docker_build(
         image=__IMAGE,
@@ -504,7 +510,7 @@ def docker_uncompress_image(tag):
     os.remove("./Dockerfile")
 
 
-## docker_image_update
+# docker_image_update
 # @author PICARD Michaël
 # @version 4
 # @brief Update (if needed) the docker image.
@@ -522,10 +528,12 @@ def docker_image_update(tag):
     try:
         print("Trying to update docker image...")
         id_image_base = get_id_docker_image(image=__COMPRESSED_IMAGE, tag=tag)
-        before_digest = get_digest_docker_image(image=__COMPRESSED_IMAGE, tag=tag)
+        before_digest = get_digest_docker_image(
+            image=__COMPRESSED_IMAGE, tag=tag)
         set_prompt_color()
         docker_pull(image=__COMPRESSED_IMAGE, tag=tag)
-        after_digest = get_digest_docker_image(image=__COMPRESSED_IMAGE, tag=tag)
+        after_digest = get_digest_docker_image(
+            image=__COMPRESSED_IMAGE, tag=tag)
         set_prompt_color("Purple")
         if before_digest != after_digest:
             print("Update found, cleaning old image and uncompressing...")
@@ -554,7 +562,7 @@ def docker_image_update(tag):
     return have_been_updated
 
 
-## docker_image_auto_cleaner
+# docker_image_auto_cleaner
 # @author PICARD Michaël
 # @version 1
 # @brief Will clean all image build with the given tag.
@@ -600,8 +608,8 @@ def docker_image_auto_cleaner(tag, old_image_id=None):
             )
 
 
-## replacement of docker_build_v4_image (generalize to any
-## version... of course TuxML was designed for >4.8 version)
+# replacement of docker_build_v4_image (generalize to any
+# version... of course TuxML was designed for >4.8 version)
 # @author PICARD Michaël, ACHER Mathieu
 # @version 1
 # @brief It will download and create an image with a different linux v4/v5 inside.
@@ -655,7 +663,7 @@ def docker_build_version_image(tag, version):
     return tagv
 
 
-##get_linux_kernel
+# get_linux_kernel
 # @author POLES Malo, PICARD Michaël
 # @version 3
 # @brief Download the linux kernel at the current location
@@ -665,7 +673,7 @@ def get_linux_kernel(name, path=None):
 
     :param name: Linux kernel version.
     :type name: str
-   
+
     .. warning:: Linux kernel version must be v4.xx
 
     :param path: directory to save the Linux kernel in
@@ -678,9 +686,11 @@ def get_linux_kernel(name, path=None):
     if name not in list_dir:
         print("Linux kernel not found, downloading", name)
         if name.startswith("linux-4"):
-            wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v4.x/{}".format(name)
+            wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v4.x/{}".format(
+                name)
         elif name.startswith("linux-5"):
-            wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v5.x/{}".format(name)
+            wget_cmd = "wget https://cdn.kernel.org/pub/linux/kernel/v5.x/{}".format(
+                name)
         else:
             print("Unrecognized kernel version (should be 4 or 5)", name)
             return
@@ -689,7 +699,7 @@ def get_linux_kernel(name, path=None):
         print("Linux kernel found.")
 
 
-## docker_image_exist
+# docker_image_exist
 # @author Picard Michaël
 # @version 1
 # @brief Check the existence of an image.
@@ -719,7 +729,8 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, seed,
-                           silent, cpu_cores, boot, check_size, json):
+                           silent, cpu_cores, boot, check_size, json, mount_host_dev
+                           ):
     """Run a docker container to compiler a Linux kernel
 
     :param image: docker image
@@ -744,12 +755,19 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
     :rtype: str
     """
     # Starting the container
-    container_id = subprocess.check_output(
-        args="{}docker run -i -v $PWD/compilation:/TuxML/compilation -d {}".format(__sudo_right, image),
+    if mount_host_dev:
+        container_id = subprocess.check_output(
+            args="{}docker run -i -v $PWD/compilation:/TuxML/compilation -d {}".format(
+                __sudo_right, image),
+            shell=True
+        ).decode('UTF-8')
+        container_id = container_id.split("\n")[0]
+    else :
+        container_id = subprocess.check_output(
+        args="{}docker run -i -d {}".format(__sudo_right, image),
         shell=True
-    ).decode('UTF-8')
-    container_id = container_id.split("\n")[0]
-
+        ).decode('UTF-8')
+        container_id = container_id.split("\n")[0]
     # Converting parameter
     specific_configuration = ""
     if tiny:
@@ -779,10 +797,14 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
         boot = "--boot"
     else:
         boot = ""
-    if json :
+    if json:
         json = "--json"
     else:
         json = ""
+    if mount_host_dev:
+        mount_host_dev = "--mount_host_dev"
+    else:
+        mount_host_dev = ""
     if check_size:
         check_size = "--check_size"
     else:
@@ -797,14 +819,15 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             cpu_cores,
             boot,
             check_size,
-            json
+            json,
+            mount_host_dev
         ),
         shell=True
     )
     return container_id
 
 
-## delete_docker_container
+# delete_docker_container
 # @author PICARD Michaël
 # @version 1
 # @brief Stop and delete the container corresponding to the given container_id
@@ -871,7 +894,7 @@ def compilation(image, args):
     nbcontainer = args.nbcontainer
     # case when a list of configs is given as argument
     if args.configs is not None:
-            nbcontainer = len(args.configs)
+        nbcontainer = len(args.configs)
     config = None
     for i in range(nbcontainer):
         if not args.silent:
@@ -897,7 +920,8 @@ def compilation(image, args):
             args.number_cpu,
             args.boot,
             args.checksize,
-            args.json
+            args.json,
+            args.mount_host_dev
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
@@ -923,13 +947,13 @@ def run_unit_testing(image):
     subprocess.call(
         args="{}docker exec -t {} py.test /TuxML/tests "
              "--cov=\"/TuxML/compilation\" -p no:warnings".format(
-            __sudo_right, container_id),
+                 __sudo_right, container_id),
         shell=True
     )
     delete_docker_container(container_id)
 
 
-## fetch_logs
+# fetch_logs
 # @author PICARD Michaël
 # @version 1
 # @brief Fetch all the logs from the container and save them into the directory
@@ -958,14 +982,17 @@ def fetch_logs(container_id, directory, silent=False):
     if not silent:
         print("Done", flush=True)
 
+
 def get_Json(container_id):
-    cmd = "{}docker cp {}:Json.json Json/{}.json".format(__sudo_right, container_id, container_id)
+    cmd = "{}docker cp {}:Json.json Json/{}.json".format(
+        __sudo_right, container_id, container_id)
     subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL)
+
 
 if __name__ == "__main__":
     args = parser()
     check_precondition_and_warning(args)
-    
+
     # Set the image tag to use.
     if args.dev:
         tag = "dev"
