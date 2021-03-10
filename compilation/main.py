@@ -261,31 +261,32 @@ def run(boot, check_size, logger, configuration, environment,
         archive_log(cid)
 
     except : 
-        if json :
+        if cid == 0 :
             print("error sending log to database")
     else :
-        if json :
+        if cid != 0 :
             cid = cid
 
-    json_file_creation(
-                cid = cid,
-                compilation_result1 = compilation_result['compilation_date'],
-                compilation_result2 = compilation_result['compilation_time'],
-                compilation_result3 = compilation_result['compiled_kernel_size'],
-                compilation_result4 = compilation_result['compiled_kernel_version'],
-                compilation_result5 = compilation_result['dependencies'],
+    if json :
+        json_file_creation(
+                    cid = cid,
+                    compilation_result1 = compilation_result['compilation_date'],
+                    compilation_result2 = compilation_result['compilation_time'],
+                    compilation_result3 = compilation_result['compiled_kernel_size'],
+                    compilation_result4 = compilation_result['compiled_kernel_version'],
+                    compilation_result5 = compilation_result['dependencies'],
 
-                compilation_result6 = compilation_result['number_cpu_core_used'],
-                compilation_result7 = compilation_result['compressed_compiled_kernel_size'],
+                    compilation_result6 = compilation_result['number_cpu_core_used'],
+                    compilation_result7 = compilation_result['compressed_compiled_kernel_size'],
 
-                compilation_result8 = open(compilation_result['stdout_log_file_path'], "r").read(),
-                compilation_result9 = open(compilation_result['stderr_log_file_path'], "r").read(),
-                compilation_result10 = open(compilation_result['user_output_file_path'], "r").read(),
-                gcc_version = environment["software"]["gcc_version"],
-                tiny=tiny,
-                config_file=config_file,
-                boot=boot,
-            )    
+                    compilation_result8 = open(compilation_result['stdout_log_file_path'], "r").read(),
+                    compilation_result9 = open(compilation_result['stderr_log_file_path'], "r").read(),
+                    compilation_result10 = open(compilation_result['user_output_file_path'], "r").read(),
+                    gcc_version = environment["software"]["gcc_version"],
+                    tiny=tiny,
+                    config_file=config_file,
+                    boot=boot,
+                )    
 
     return cid
 
