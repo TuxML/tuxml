@@ -819,8 +819,7 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             cpu_cores,
             boot,
             check_size,
-            json,
-            mount_host_dev
+            json
         ),
         shell=True
     )
