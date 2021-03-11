@@ -24,8 +24,11 @@ class APIManager:
         self.headers = []
         self.auth = []
         self.params = []
+
         self.setAddress(self.DEFAULT_API_ADDRESS)
         self.setHeaders(self.DEFAULT_HEADERS)
+        self.setAuth(self.DEFAULT_AUTH)
+        self.setParams(self.DEFAULT_PARAMS)
 
     def setAddress(self, address):
         self.address = address
