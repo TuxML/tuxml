@@ -3,29 +3,47 @@ import requests
 
 class APIManager:
 
-    ADDRESS = "https://reqres.in/api/users"
-    HEADERS = {
+    DEFAULT_API_ADDRESS = "https://reqres.in/api/users"
+
+    DEFAULT_HEADERS = {
         'Content-type': 'application/json',
     }
+
+    DEFAULT_AUTH = None
+    # Example :
+    # ('username', 'password')
+
+    DEFAULT_PARAMS = None
+    # Example :
+    # DEFAULT_PARAMS = (
+    #     ('key', 'mykeyhere'),
+    # )
 
     def __init__(self):
         self.address = ""
         self.headers = []
-
-        self.setAddress(self.ADDRESS)
-        self.setHeaders(self.HEADERS)
+        self.auth = []
+        self.params = []
+        self.setAddress(self.DEFAULT_API_ADDRESS)
+        self.setHeaders(self.DEFAULT_HEADERS)
 
     def setAddress(self, address):
         self.address = address
 
     def setHeaders(self, headers):
         self.headers = headers
+    
+    def setAuth(self, auth):
+        self.auth = auth
+
+    def setParams(self, params):
+        self.params = params
 
     def sendGet(self):
-        return requests.get(self.address, self.headers)
+        return requests.get(self.address, headers=self.headers, auth=self.auth, params=self.params)
 
     def sendPost(self, data):
-        return requests.post(self.address, self.headers, data)
+        return requests.post(self.address, headers=self.headers, auth=self.auth, params=self.params, data=data)
 
 # TEST A SUPPRIMER
 apiManager = APIManager()
