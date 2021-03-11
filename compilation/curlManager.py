@@ -27,18 +27,21 @@ class CurlManager:
     def sendPost(self, data):
         return requests.post(self.address, self.headers, data)
 
-    def test(self):
-        print("Test GET :")
-        response = self.sendGet()
-        print(response)
-        print(response.json())
-
-        print("Test POST :")
-        data = '{ "name": "lea", "job": "mia" }'
-        response = self.sendPost(data)
-        print(response)
-        print(response.json())
-
-
+# TEST A SUPPRIMER
 curlManager = CurlManager()
-curlManager.test()
+
+print("\n*************\nTest GET :\n*************")
+
+response = curlManager.sendGet()
+
+print(response)
+print(response.json())
+
+print("\n*************\nTest POST :\n*************")
+
+data = '{ "name": "lea", "job": "mia" }'
+response = curlManager.sendPost(data)
+
+print(response)
+print(response.json())
+print()
