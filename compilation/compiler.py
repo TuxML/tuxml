@@ -232,9 +232,9 @@ class Compiler:
                      pipe_to_write,
                      start_compilation_timer):
         for line in iter(pipe_to_read.readline, ""):
-            now = time.time() - start_compilation_timer;
+            now = time.time() - start_compilation_timer
             now_f = time.strftime("[%H:%M:%S] ", time.gmtime(now))
-            print(now_f + line, end="", file=pipe_to_write)
+            print(now_f + line, end="", file=pipe_to_write, flush=True)
 
     ## __compile
     # @author LEBRETON Mickaël, PICARD Michaël, AMIARD Anthony
@@ -278,9 +278,14 @@ class Compiler:
         tout.deamon = True
         tout.start()
         for line in iter(popen.stderr.readline, ""):
-            now = time.time() - start_compilation_timer;
+            now = time.time() - start_compilation_timer
             now_f = time.strftime("[%H:%M:%S] ", time.gmtime(now))
-            print(now_f + line, end="", file=self.__logger.get_stderr_pipe())
+            print(
+                now_f + line,
+                end="",
+                file=self.__logger.get_stderr_pipe(),
+                flush=True
+            )
         failure = popen.wait()
         popen.stdout.close()
         popen.stderr.close()
