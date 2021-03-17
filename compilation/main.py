@@ -263,9 +263,6 @@ def run(boot, check_size, logger, configuration, environment,
     except : 
         if cid == 0 :
             print("error sending log to database")
-    else :
-        if cid != 0 :
-            cid = cid
 
     if json :
         json_file_creation(
@@ -279,9 +276,9 @@ def run(boot, check_size, logger, configuration, environment,
                     compilation_result6 = compilation_result['number_cpu_core_used'],
                     compilation_result7 = compilation_result['compressed_compiled_kernel_size'],
 
-                    compilation_result8 = open(compilation_result['stdout_log_file_path'], "r").read(),
-                    compilation_result9 = open(compilation_result['stderr_log_file_path'], "r").read(),
-                    compilation_result10 = open(compilation_result['user_output_file_path'], "r").read(),
+                    compilation_result8 = open(logger.get_stdout_file(), "r").read(),
+                    compilation_result9 = open(logger.get_stderr_file(), "r").read(),
+                    compilation_result10 = open(logger.get_user_output_file(), "r").read(),
                     gcc_version = environment["software"]["gcc_version"],
                     tiny=tiny,
                     config_file=config_file,

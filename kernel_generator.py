@@ -924,7 +924,8 @@ def compilation(image, args):
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
-        get_Json(container_id)
+        if args.json :
+            get_Json(container_id)
         delete_docker_container(container_id)
     if not args.silent:
         feedback_user(nbcontainer, args.incremental)

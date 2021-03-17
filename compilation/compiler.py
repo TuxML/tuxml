@@ -545,13 +545,10 @@ class Compiler:
                 open("{}/.config".format(self.__kernel_path), "rb").read()),
             "stdout_log_file": bz2.compress(
                 open(self.__logger.get_stdout_file(), "rb").read()),
-            "stdout_log_file_path":  self.__logger.get_stdout_file(),
             "stderr_log_file": bz2.compress(
                 open(self.__logger.get_stderr_file(), "rb").read()),
-            "stderr_log_file_path": self.__logger.get_stderr_file(),
             "user_output_file": bz2.compress(
                 open(self.__logger.get_user_output_file(), "rb").read()),
-            "user_output_file_path": self.__logger.get_user_output_file(),
             "compiled_kernel_size": self.__kernel_size,
             "compressed_compiled_kernel_size": self.__kernel_compressed_size,
             "dependencies": " ".join(
@@ -559,3 +556,5 @@ class Compiler:
             "number_cpu_core_used": self.__nb_core,
             "compiled_kernel_version": self.__kernel_version
         }
+    
+
