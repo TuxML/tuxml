@@ -987,6 +987,7 @@ def get_Json(container_id):
     cmd = "{}docker cp {}:Json.json Json/{}.json".format(
         __sudo_right, container_id, container_id)
     subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL)
+    print("fichier json cree {}".format(container_id))
 
 
 if __name__ == "__main__":

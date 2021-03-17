@@ -234,6 +234,8 @@ def run(boot, check_size, logger, configuration, environment,
     )
     compiler.run()
     compilation_result = compiler.get_compilation_dictionary()
+    environmenthard = environment['hardware']
+    environmentsoft = environment["software"]
 
     boot_result = None
     size_result = None
@@ -279,17 +281,33 @@ def run(boot, check_size, logger, configuration, environment,
                     compilation_result8 = open(logger.get_stdout_file(), "r").read(),
                     compilation_result9 = open(logger.get_stderr_file(), "r").read(),
                     compilation_result10 = open(logger.get_user_output_file(), "r").read(),
-                    gcc_version = environment["software"]["gcc_version"],
+                    gcc_version = environmentsoft["gcc_version"],
                     tiny=tiny,
-                    config_file=config_file,
+                    config_file= open("{}/.config".format(compiler.get_kernel_path()), "r").read(),
                     boot=boot,
+                    compilation_result11 = environmenthard['cpu_brand_name'],
+                    compilation_result12 = environmenthard['cpu_max_frequency'],
+                    compilation_result13 = environmenthard['ram_size'],
+                    compilation_result14 = environmenthard['architecture'],
+                    compilation_result15 = environmenthard['number_cpu_core'],
+                    compilation_result16 = environmenthard['mechanical_disk'],
+
+                    compilation_result17 = environmentsoft['libc_version'],
+                    compilation_result18 = environmentsoft['tuxml_version'],
+                    compilation_result19 = environmentsoft['system_kernel'],
+                    compilation_result20 = environmentsoft['linux_distribution'],
+                    compilation_result21 = environmentsoft['linux_distribution_version'],
+                    compilation_result22 = environmentsoft['system_kernel_version'],
                 )    
 
     return cid
 
 
 def json_file_creation(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, compilation_result5,
-compilation_result6, compilation_result7, compilation_result8, compilation_result9, compilation_result10, gcc_version, tiny, config_file, boot) :
+compilation_result6, compilation_result7, compilation_result8, compilation_result9, compilation_result10, 
+compilation_result11, compilation_result12, compilation_result13, compilation_result14 ,
+compilation_result15, compilation_result16, compilation_result17, compilation_result18, compilation_result21 ,
+compilation_result20, compilation_result22, compilation_result19, gcc_version, tiny, config_file, boot) :
 
     myJsonStruct = {
          'cid' : cid,
@@ -307,13 +325,22 @@ compilation_result6, compilation_result7, compilation_result8, compilation_resul
          'tiny' : tiny,
          'config_file' : config_file,
          'boot' : boot,
-        
+         'cpu_brand_name' : compilation_result11,
+         'cpu_max_frequency' : compilation_result12,
+         'ram_size' : compilation_result13,
+         'architecture': compilation_result14,
+         'number_cpu_core' : compilation_result15,
+         'mechanical_disk' : compilation_result16,
+         'libc_version' : compilation_result17,
+         'tuxml_version' : compilation_result18,
+         'system_kernel' : compilation_result19,
+         'linux_distribution' : compilation_result20,
+         'linux_distribution_version' : compilation_result21,
+         'system_kernel_version' : compilation_result22
     }
 
     with open('Json.json', 'w') as json_file:
         myJson = json.dump(myJsonStruct, json_file)
-
-
     
     
 ## archive_log
@@ -364,6 +391,8 @@ def insert_result_into_database(logger, compilation, hardware, software,
 
     logger.timed_print_output("Successfully sent results with cid : {}".format(
         cid), color=COLOR_SUCCESS)
+    
+
     return cid
 
 

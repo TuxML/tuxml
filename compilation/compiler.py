@@ -529,6 +529,15 @@ class Compiler:
             stderr=subprocess.DEVNULL
         ))
 
+    ## get_kernel_path
+    #return the path of the config file
+    def get_kernel_path(self):
+        """return __kernel_path for the config file
+
+        :return __kernel_path
+        """
+        return self.__kernel_path
+
     ## __set_result_dictionary
     # @author PICARD Michaël
     # @version 1
