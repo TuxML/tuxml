@@ -261,28 +261,35 @@ def run(boot, check_size, logger, configuration, environment,
         archive_log(cid)
 
     except : 
-        if json :
+        if cid == 0 :
             print("error sending log to database")
-    else :
-        if json :
-            cid = cid
 
-    json_file_creation(
-                cid = cid,
-                compilation_result1 = compilation_result['compilation_date'],
-                compilation_result2 = compilation_result['compilation_time'],
-                compilation_result3 = compilation_result['compiled_kernel_size'],
-                compilation_result4 = compilation_result['compiled_kernel_version'],
-                gcc_version = environment["software"]["gcc_version"],
-                tiny=tiny,
-                config_file=config_file,
-                boot=boot,
-            )    
+    if json :
+        json_file_creation(
+                    cid = cid,
+                    compilation_result1 = compilation_result['compilation_date'],
+                    compilation_result2 = compilation_result['compilation_time'],
+                    compilation_result3 = compilation_result['compiled_kernel_size'],
+                    compilation_result4 = compilation_result['compiled_kernel_version'],
+                    compilation_result5 = compilation_result['dependencies'],
+
+                    compilation_result6 = compilation_result['number_cpu_core_used'],
+                    compilation_result7 = compilation_result['compressed_compiled_kernel_size'],
+
+                    compilation_result8 = open(logger.get_stdout_file(), "r").read(),
+                    compilation_result9 = open(logger.get_stderr_file(), "r").read(),
+                    compilation_result10 = open(logger.get_user_output_file(), "r").read(),
+                    gcc_version = environment["software"]["gcc_version"],
+                    tiny=tiny,
+                    config_file=config_file,
+                    boot=boot,
+                )    
 
     return cid
 
 
-def json_file_creation(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, gcc_version, tiny, config_file, boot) :
+def json_file_creation(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, compilation_result5,
+compilation_result6, compilation_result7, compilation_result8, compilation_result9, compilation_result10, gcc_version, tiny, config_file, boot) :
 
     myJsonStruct = {
          'cid' : cid,
@@ -290,6 +297,12 @@ def json_file_creation(cid, compilation_result1, compilation_result2, compilatio
          'compilation_time' : compilation_result2,
          'compiled_kernel_size' : compilation_result3,
          'compiled_kernel_version' : compilation_result4,
+         'dependencies' : compilation_result5,
+         'number_cpu_core_used' : compilation_result6,
+         'compressed_compiled_kernel_size' : compilation_result7,
+         'stdout_log_file' : compilation_result8,
+         'stderr_log_file' : compilation_result9,
+         'user_output_file' : compilation_result10,
          'gcc_version' : gcc_version,
          'tiny' : tiny,
          'config_file' : config_file,
