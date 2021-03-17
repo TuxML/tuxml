@@ -556,3 +556,5 @@ class Compiler:
             "number_cpu_core_used": self.__nb_core,
             "compiled_kernel_version": self.__kernel_version
         }
+    
+
