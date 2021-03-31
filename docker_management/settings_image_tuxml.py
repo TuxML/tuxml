@@ -18,7 +18,7 @@ CONTENT_BASE_IMAGE = {
     'RUN_DEP': "RUN apt-get -qq -y update && apt-get -qq -y install python3 python3-dev python3-pip python3-setuptools default-libmysqlclient-dev apt-file apt-utils && apt-get install -qq -y --no-install-recommends --download-only " +
             BASIC_DEP,
     'RUN_DEP_FILE': "RUN echo " + BASIC_DEP + " > /dependencies.txt",
-    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov",
+    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov requests",
     'CPRUN_BB': "COPY installBusyBox.sh /installBusyBox.sh\n"
                 "COPY init /init\n"
                 "RUN ./installBusyBox.sh\n"
@@ -74,7 +74,7 @@ CONTENT_BASE_IMAGE_2 = {
     'RUN_DEP': "RUN apt-get -qq -y update && apt-get -qq -y install python3 python3-dev python3-pip python3-setuptools default-libmysqlclient-dev apt-file apt-utils && apt-get install -qq -y --no-install-recommends --download-only " +
             BASIC_DEP,
     'RUN_DEP_FILE': "RUN echo " + BASIC_DEP + " > /dependencies.txt",
-    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov",
+    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov requests",
     'CPRUN_BB': "COPY installBusyBox.sh /installBusyBox.sh\n"
                 "COPY init /init\n"
                 "RUN ./installBusyBox.sh\n"
@@ -131,7 +131,7 @@ CONTENT_BASE_IMAGE_3 = {
     'RUN_DEP': "RUN apt-get -qq -y update && apt-get -qq -y install python3 python3-dev python3-pip python3-setuptools default-libmysqlclient-dev apt-file apt-utils && apt-get install -qq -y --no-install-recommends --download-only " +
             BASIC_DEP,
     'RUN_DEP_FILE': "RUN echo " + BASIC_DEP + " > /dependencies.txt",
-    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov",
+    'RUN_PIP': "RUN pip3 install wheel mysqlclient psutil pytest pytest-cov requests",
     'CPRUN_BB': "COPY installBusyBox.sh /installBusyBox.sh\n"
                 "COPY init /init\n"
                 "RUN ./installBusyBox.sh\n"
