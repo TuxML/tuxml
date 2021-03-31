@@ -1,9 +1,8 @@
 import requests
 
-
 class APIManager:
 
-    DEFAULT_API_ADDRESS = "https://reqres.in/api/users"
+    DEFAULT_API_ADDRESS = "https://tuxmlweb.istic.univ-rennes1.fr/api/v0/tokenwrite4jeHmRkh7R/uploadResults"
 
     DEFAULT_HEADERS = {
         'Content-type': 'application/json',
@@ -45,24 +44,5 @@ class APIManager:
     def sendGet(self):
         return requests.get(self.address, headers=self.headers, auth=self.auth, params=self.params)
 
-    def sendPost(self, data):
-        return requests.post(self.address, headers=self.headers, auth=self.auth, params=self.params, data=data)
-
-# TEST A SUPPRIMER
-apiManager = APIManager()
-
-print("\n*************\nTest GET :\n*************")
-
-response = apiManager.sendGet()
-
-print(response)
-print(response.json())
-
-print("\n*************\nTest POST :\n*************")
-
-data = '{ "name": "lea", "job": "mia" }'
-response = apiManager.sendPost(data)
-
-print(response)
-print(response.json())
-print()
+    def sendPost(self, json):
+        return requests.post(self.address, headers=self.headers, auth=self.auth, params=self.params, json=json)
