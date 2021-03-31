@@ -7,10 +7,11 @@ import subprocess
 import bz2
 import json
 
+from compilation.apiManager import APIManager
 from compilation.environment import get_environment_details, print_environment_details
 from compilation.configuration import create_configuration, print_configuration
 from compilation.package_manager import PackageManager
-from compilation.logger import Logger, COLOR_SUCCESS
+from compilation.logger import Logger, COLOR_SUCCESS, COLOR_ERROR
 from compilation.compiler import Compiler
 from compilation.boot_checker import BootChecker
 from compilation.database_management import fetch_connection_to_database, insert_if_not_exist_and_fetch_hardware, insert_if_not_exist_and_fetch_software, insert_and_fetch_compilation, insert_incrementals_compilation, insert_boot_result, insert_sizes
@@ -250,25 +251,9 @@ def run(boot, check_size, logger, configuration, environment,
             logger.reset_boot_pipe()
 
     cid = 0
-    try :
-        cid = insert_result_into_database(
-            logger,
-            compilation_result,
-            environment['hardware'],
-            environment['software'],
-            size_result,
-            cid_before,
-            boot_result,
-        )
-        archive_log(cid)
-
-    except : 
-        if cid == 0 :
-            print("error sending log to database")
 
     if json :
-        json_file_creation(
-                    cid = cid,
+        json_data = json_file_creation(
                     compilation_result1 = compilation_result['compilation_date'],
                     compilation_result2 = compilation_result['compilation_time'],
                     compilation_result3 = compilation_result['compiled_kernel_size'],
@@ -300,17 +285,42 @@ def run(boot, check_size, logger, configuration, environment,
                     compilation_result22 = environmentsoft['system_kernel_version'],
                 )    
 
+        apiManager = APIManager()
+        response = apiManager.sendPost(json_data)
+        if (response.status_code == 201): 
+            cid = response.json()
+            logger.timed_print_output(
+                "Compilation send to TuxML API.",
+                color=COLOR_SUCCESS
+            )
+            logger.timed_print_output(
+                "CID received from database : "+str(cid),
+                color=COLOR_SUCCESS
+            )
+        else:
+            logger.timed_print_output(
+                "Error received from TuxML API when sending compilation.",
+                color=COLOR_ERROR
+            )
+            logger.timed_print_output(
+                "Status code : "+str(response.status_code),
+                color=COLOR_ERROR
+            )
+            logger.timed_print_output(
+                "Error message : "+response.text,
+                color=COLOR_ERROR
+            )
+
     return cid
 
 
-def json_file_creation(cid, compilation_result1, compilation_result2, compilation_result3, compilation_result4, compilation_result5,
+def json_file_creation(compilation_result1, compilation_result2, compilation_result3, compilation_result4, compilation_result5,
 compilation_result6, compilation_result7, compilation_result8, compilation_result9, compilation_result10, 
 compilation_result11, compilation_result12, compilation_result13, compilation_result14 ,
 compilation_result15, compilation_result16, compilation_result17, compilation_result18, compilation_result21 ,
 compilation_result20, compilation_result22, compilation_result19, gcc_version, tiny, config_file, boot) :
 
     myJsonStruct = {
-         'cid' : cid,
          'compilation_date' : compilation_result1,
          'compilation_time' : compilation_result2,
          'compiled_kernel_size' : compilation_result3,
@@ -341,6 +351,8 @@ compilation_result20, compilation_result22, compilation_result19, gcc_version, t
 
     with open('Json.json', 'w') as json_file:
         myJson = json.dump(myJsonStruct, json_file)
+
+    return myJsonStruct
     
     
 ## archive_log
