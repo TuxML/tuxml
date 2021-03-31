@@ -465,20 +465,24 @@ def check_precondition_and_warning(args):
         print("You aren't in the docker group, hence you will be ask superuser"
               " access.")
     if args.dev:
-        print("You are using the development version, whose can be unstable.")
+        print("--dev | You are using the development version, whose can be unstable.")
     if args.local:
-        print("You are using the local version, which means that you could be "
+        print("--local | You are using the local version, which means that you could be "
               "out to date, or you could crash if you don't have the image.")
     if args.tiny:
-        print("You are using tiny configuration.")
+        print("--tiny | You are using tiny configuration.")
+    if args.json:
+        print("--json | You will save the compilation locally in a json file.")
+    if args.mount_host_dev:
+        print("--mount_host_dev | You will use your local code instead of the one contained in docker image. Usefull for development only.")
     if args.configs is not None:
-        print("You are using the following configuration(s):")
+        print("--configs | You are using the following configuration(s):")
         for conf in args.configs:
             print("\t* {}".format(conf))
     if args.seed is not None:
-        print("You are using your specific set of seed options")
+        print("--seed | You are using your specific set of seed options")
     if args.unit_testing:
-        print("You will unit test the project, which will not compile any "
+        print("--unit_testing | You will unit test the project, which will not compile any "
               "kernel and could have disabled a few of your option choice.")
     set_prompt_color()
 
