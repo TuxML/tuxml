@@ -854,11 +854,11 @@ def feedback_user(nbcontainer, nbincremental):
     total_of_compilation = nbcontainer * (nbincremental + 1)
 
     set_prompt_color("Light_Blue")
-    print("\nYour tamago... database Irma_db ate ", end="")
+    print("\nYou sent ", end="")
     set_prompt_color("Green")
     print(total_of_compilation, end="")
     set_prompt_color("Light_Blue")
-    print(" compilations data, come back later to feed it!")
+    print(" compilations data to the TuxML API.")
 
     print("Total number of container used : ", end="")
     set_prompt_color("Green")
@@ -984,10 +984,18 @@ def fetch_logs(container_id, directory, silent=False):
 
 
 def get_Json(container_id):
-    cmd = "{}docker cp {}:Json.json Json/{}.json".format(
-        __sudo_right, container_id, container_id)
-    subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL)
-    print("fichier json cree {}".format(container_id))
+    set_prompt_color("Light_Blue")
+    print("Try to create JSON file : {}{}".format(container_id, ".json"))
+    try:
+        cmd = "{}docker cp {}:Json.json Json/{}.json".format(
+            __sudo_right, container_id, container_id)
+        subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError as e:
+        set_prompt_color("Red")
+        print("Json file was not created")
+    else:
+        set_prompt_color("Green")
+        print("Json file created")
 
 
 if __name__ == "__main__":
