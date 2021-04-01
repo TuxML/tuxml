@@ -989,17 +989,17 @@ def fetch_logs(container_id, directory, silent=False):
 
 def get_Json(container_id):
     set_prompt_color("Light_Blue")
-    print("Try to create JSON file : {}{}".format(container_id, ".json"))
+    print("Try to create JSON file locally : {}{}".format(container_id, ".json"))
     try:
         cmd = "{}docker cp {}:Json.json Json/{}.json".format(
             __sudo_right, container_id, container_id)
         subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL, check=True)
     except subprocess.CalledProcessError as e:
         set_prompt_color("Red")
-        print("Json file was not created")
+        print("Json file was not created locally")
     else:
         set_prompt_color("Green")
-        print("Json file created")
+        print("Json file created locally")
 
 
 if __name__ == "__main__":
