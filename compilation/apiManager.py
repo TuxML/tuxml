@@ -2,10 +2,13 @@ import requests
 
 class APIManager:
 
-    DEFAULT_API_ADDRESS = "https://tuxmlweb.istic.univ-rennes1.fr/api/v0/tokenwrite4jeHmRkh7R/uploadResults"
+    TOKEN = "tokenwrite4jeHmRkh7R"
+
+    DEFAULT_API_ADDRESS = "https://tuxmlweb.istic.univ-rennes1.fr/api/v0/uploadResults"
 
     DEFAULT_HEADERS = {
         'Content-type': 'application/json',
+        'authorization': 'Bearer '+TOKEN
     }
 
     DEFAULT_AUTH = None

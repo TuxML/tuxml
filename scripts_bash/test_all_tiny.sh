@@ -8,7 +8,7 @@ do
 
 for j in ${tableau_version_kernel[*]}
 do 
-python3 kernel_generator.py --dev --local --tiny --linux_version $j --compiler $i --json
+python3 kernel_generator.py --dev --local --tiny --linux_version $j --compiler $i --json --mount_host_dev
 echo 'end for' $i 'with' $j
 done 
 done
