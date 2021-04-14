@@ -61,6 +61,13 @@ def parser():
              "--tiny argument."
     )
     parser.add_argument(
+        "--clang_version",
+        type=int,
+        help="Clang version to use. Only versions 9 and 11 are supported. "
+             "May not work with all images. 0 to use GCC.",
+        default=0
+    )
+    parser.add_argument(
         "--cpu_cores",
         help="Give the number of cpu cores to use. Default to 0, which mean all"
              " the cores.",
@@ -194,7 +201,7 @@ def retrieve_sizes(path, kernel_version):
 # it should be called multiple time for multiple compilation.
 def run(boot, check_size, logger, configuration, environment,
         package_manager, tiny=False, config_file=None,
-        cid_before=None, json_bool=False):
+        cid_before=None, json_bool=False, clang_version=0):
     """Do all the tests, from compilation to sending the results to the
     database.
 
@@ -222,8 +229,16 @@ def run(boot, check_size, logger, configuration, environment,
     :type config_file: str
     :param cid_before:
     :type cid_before:
+    :param clang_version: Clang version to use. 0 to use GCC. Only 9 and 11 are
+        supported on Debian 11.
+    :type clang_version: int
 
     """
+    compiler_exec = 'gcc'
+    if clang_version == 9:
+        compiler_exec = 'clang-9'
+    elif clang_version == 11:
+        compiler_exec = 'clang'
     compiler = Compiler(
         logger=logger,
         package_manager=package_manager,
@@ -232,6 +247,7 @@ def run(boot, check_size, logger, configuration, environment,
         kernel_version=configuration['kernel_version_compilation'],
         tiny=tiny,
         config_file=config_file,
+        compiler_exec=compiler_exec
     )
     compiler.run()
     compilation_result = compiler.get_compilation_dictionary()
@@ -445,7 +461,8 @@ if __name__ == "__main__":
         package_manager=package_manager,
         tiny=args.tiny,
         config_file=args.config,
-        json_bool=args.json
+        json_bool=args.json,
+        clang_version=args.clang_version
     )
 
     # Cleaning the container

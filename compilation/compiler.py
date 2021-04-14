@@ -47,10 +47,12 @@ class Compiler:
     :type tiny: bool
     :param config_file: path to the configuration file (``.config``)
     :type config_file: str
-
+    :param compiler_exec: compiler to use
+    :type compiler_exec: str
     """    
     def __init__(self, logger, package_manager, nb_core, kernel_path,
-                 kernel_version, tiny=False, config_file=None):
+                 kernel_version, tiny=False, config_file=None,
+                 compiler_exec='gcc'):
         """Constructor method
 
         """
@@ -66,6 +68,7 @@ class Compiler:
         self.__kernel_version = kernel_version
         self.__tiny = tiny
         self.__config_file = config_file
+        self.__compiler_exec = compiler_exec
 
         # Variables results
         self.__compilation_success = False
@@ -194,8 +197,10 @@ class Compiler:
                 "Tiny config with preset values here : {} .".format(
                     settings.TINY_CONFIG_SEED_FILE))
             subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make -C {} tinyconfig -j{}".format(
+                args="KCONFIG_ALLCONFIG={} make CC={} -C {} tinyconfig -j{}"
+                    .format(
                     settings.TINY_CONFIG_SEED_FILE,
+                    self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
                 ),
@@ -210,8 +215,10 @@ class Compiler:
             with open(settings.CONFIG_SEED_FILE, 'r') as seed_list:
                 self.__logger.print_output(seed_list.read())
             subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make -C {} randconfig -j{}".format(
+                args="KCONFIG_ALLCONFIG={} make CC={} -C {} randconfig -j{}"
+                    .format(
                     settings.CONFIG_SEED_FILE,
+                    self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
                 ),
@@ -264,7 +271,13 @@ class Compiler:
         """
         self.__logger.timed_print_output("Compilation in progress")
         popen = subprocess.Popen(
-            ["make", "-C", self.__kernel_path, "-j{}".format(self.__nb_core)],
+            [
+                "make",
+                "CC={}".format(self.__compiler_exec),
+                "-C",
+                self.__kernel_path,
+                "-j{}".format(self.__nb_core)
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True
@@ -420,7 +433,8 @@ class Compiler:
 
             self.__enable_only_one_compression_option(compression)
             subprocess.run(
-                args="make -C {} -j{}".format(
+                args="make CC={} -C {} -j{}".format(
+                    self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
                 ),
@@ -463,7 +477,8 @@ class Compiler:
             config.write(basic_config)
             config.flush()
             subprocess.run(
-                args="make -C {} -j{}".format(
+                args="make CC={} -C {} -j{}".format(
+                    self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
                 ),
