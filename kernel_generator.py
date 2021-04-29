@@ -835,7 +835,8 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             cpu_cores,
             boot,
             check_size,
-            json # TODO: tag
+            json, 
+            tag
         ),
         shell=True
     )
