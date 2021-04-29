@@ -389,7 +389,13 @@ def parser():
     parser.add_argument(
         "--mount_host_dev",
         action="store_true",
-        help="Optional. permit us to use the local file without recreate the images"
+        help="Optional. Enables to use the local source scripts/files without recreating the Docker images"
+    )
+
+    parser.add_argument(
+        "--tag",
+        type=str,
+        help="Optional. Enables to tag a compilation or a set of compilations (with a string)"
     )
 
     return parser.parse_args()
@@ -481,6 +487,8 @@ def check_precondition_and_warning(args):
             print("\t* {}".format(conf))
     if args.seed is not None:
         print("--seed | You are using your specific set of seed options")
+    if args.tag is not None:
+        print("--tag | You are tagging compilation(s)")
     if args.unit_testing:
         print("--unit_testing | You will unit test the project, which will not compile any "
               "kernel and could have disabled a few of your option choice.")
@@ -733,7 +741,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, seed,
-                           silent, cpu_cores, boot, check_size, json, mount_host_dev
+                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tag
                            ):
     """Run a docker container to compiler a Linux kernel
 
@@ -809,6 +817,10 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
         mount_host_dev = "--mount_host_dev"
     else:
         mount_host_dev = ""
+    if tag:
+        tag = "--tag {}".format(tag)
+    else:
+        tag = ""
     if check_size:
         check_size = "--check_size"
     else:
@@ -823,7 +835,7 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             cpu_cores,
             boot,
             check_size,
-            json
+            json # TODO: tag
         ),
         shell=True
     )
@@ -924,7 +936,8 @@ def compilation(image, args):
             args.boot,
             args.checksize,
             args.json,
-            args.mount_host_dev
+            args.mount_host_dev,
+            args.tag
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
