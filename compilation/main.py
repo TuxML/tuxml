@@ -88,12 +88,18 @@ def parser():
     parser.add_argument(
         "--json",
         action="store_true",
-        help="create a json which has importants informations."
+        help="Serialize into a JSON file with informations about the build."
     )
     parser.add_argument(
         "--mount_host_dev",
         action="store_true",
-        help="Should be use for development only. Permit to use local source code without regenerate docker images."
+        help="Should be used for development only. Enables to use local source code without regenerating Docker images."
+    )
+
+    parser.add_argument(
+        "--tag",
+        type=str,
+        help="Optional. Enables to tag a compilation or a set of compilations (with a string)"
     )
     
     return parser.parse_args()
@@ -201,7 +207,7 @@ def retrieve_sizes(path, kernel_version):
 # it should be called multiple time for multiple compilation.
 def run(boot, check_size, logger, configuration, environment,
         package_manager, tiny=False, config_file=None,
-        cid_before=None, json_bool=False, clang_version=0):
+        cid_before=None, json_bool=False, clang_version=0, tag=""):
     """Do all the tests, from compilation to sending the results to the
     database.
 
@@ -255,10 +261,10 @@ def run(boot, check_size, logger, configuration, environment,
     environmentsoft = environment["software"]
 
     boot_result = None
-    size_result = None
+    size_result = None # TODO in the JSON!
     if compiler.is_successful():
         if check_size:
-            size_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation'])
+            size_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) # TODO in the JSON!
         if boot:
             boot_checker = BootChecker(logger, configuration['kernel_path'])
             boot_checker.run()
@@ -268,37 +274,26 @@ def run(boot, check_size, logger, configuration, environment,
 
     cid = 0
 
-    json_data = json_generation(
-                compilation_result1 = compilation_result['compilation_date'],
-                compilation_result2 = compilation_result['compilation_time'],
-                compilation_result3 = compilation_result['compiled_kernel_size'],
-                compilation_result4 = compilation_result['compiled_kernel_version'],
-                compilation_result5 = compilation_result['dependencies'],
-
-                compilation_result6 = compilation_result['number_cpu_core_used'],
-                compilation_result7 = compilation_result['compressed_compiled_kernel_size'],
-
-                compilation_result8 = open(logger.get_stdout_file(), "r").read(),
-                compilation_result9 = open(logger.get_stderr_file(), "r").read(),
-                compilation_result10 = open(logger.get_user_output_file(), "r").read(),
-                gcc_version = environmentsoft["gcc_version"],
-                tiny=tiny,
-                config_file= open("{}/.config".format(compiler.get_kernel_path()), "r").read(),
-                boot=boot,
-                compilation_result11 = environmenthard['cpu_brand_name'],
-                compilation_result12 = environmenthard['cpu_max_frequency'],
-                compilation_result13 = environmenthard['ram_size'],
-                compilation_result14 = environmenthard['architecture'],
-                compilation_result15 = environmenthard['number_cpu_core'],
-                compilation_result16 = environmenthard['mechanical_disk'],
-
-                compilation_result17 = environmentsoft['libc_version'],
-                compilation_result18 = environmentsoft['tuxml_version'],
-                compilation_result19 = environmentsoft['system_kernel'],
-                compilation_result20 = environmentsoft['linux_distribution'],
-                compilation_result21 = environmentsoft['linux_distribution_version'],
-                compilation_result22 = environmentsoft['system_kernel_version'],
-            )    
+    configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read()
+    json_data = {'cid': 0, 'compilation_date': compilation_result['compilation_date'],
+                 'compilation_time': compilation_result['compilation_time'],
+                 'compiled_kernel_size': compilation_result['compiled_kernel_size'],
+                 'compiled_kernel_version': compilation_result['compiled_kernel_version'],
+                 'dependencies': compilation_result['dependencies'],
+                 'number_cpu_core_used': compilation_result['number_cpu_core_used'],
+                 'compressed_compiled_kernel_size': compilation_result['compressed_compiled_kernel_size'],
+                 'stdout_log_file': open(logger.get_stdout_file(), "r").read(),
+                 'stderr_log_file': open(logger.get_stderr_file(), "r").read(),
+                 'user_output_file': open(logger.get_user_output_file(), "r").read(),
+                 'gcc_version': environmentsoft["gcc_version"], 'tiny': tiny, 'config_file': configfile, 'boot': boot,
+                 'cpu_brand_name': environmenthard['cpu_brand_name'],
+                 'cpu_max_frequency': environmenthard['cpu_max_frequency'], 'ram_size': environmenthard['ram_size'],
+                 'architecture': environmenthard['architecture'], 'number_cpu_core': environmenthard['number_cpu_core'],
+                 'mechanical_disk': environmenthard['mechanical_disk'], 'libc_version': environmentsoft['libc_version'],
+                 'tuxml_version': environmentsoft['tuxml_version'], 'system_kernel': environmentsoft['system_kernel'],
+                 'linux_distribution': environmentsoft['linux_distribution'],
+                 'linux_distribution_version': environmentsoft['linux_distribution_version'],
+                 'system_kernel_version': environmentsoft['system_kernel_version'], 'tag': tag}
 
     apiManager = APIManager()
     response = apiManager.sendPost(json_data)
@@ -309,7 +304,7 @@ def run(boot, check_size, logger, configuration, environment,
             color=COLOR_SUCCESS
         )
         logger.timed_print_output(
-            "CID received from database : "+str(cid),
+            "CID received from database : " + str(cid),
             color=COLOR_SUCCESS
         )
 
@@ -319,11 +314,11 @@ def run(boot, check_size, logger, configuration, environment,
             color=COLOR_ERROR
         )
         logger.timed_print_output(
-            "Status code : "+str(response.status_code),
+            "Status code : " + str(response.status_code),
             color=COLOR_ERROR
         )
         logger.timed_print_output(
-            "Error message : "+response.text,
+            "Error message : " + response.text,
             color=COLOR_ERROR
         )
         
@@ -338,44 +333,7 @@ def create_json_file(cid, json_data):
     with open('Json.json', 'w') as json_file:
         myJson = json.dump(json_data, json_file)
 
-def json_generation(compilation_result1, compilation_result2, compilation_result3, compilation_result4, compilation_result5,
-compilation_result6, compilation_result7, compilation_result8, compilation_result9, compilation_result10, 
-compilation_result11, compilation_result12, compilation_result13, compilation_result14 ,
-compilation_result15, compilation_result16, compilation_result17, compilation_result18, compilation_result21 ,
-compilation_result20, compilation_result22, compilation_result19, gcc_version, tiny, config_file, boot) :
 
-    json_structure = {
-        'cid' : 0,
-        'compilation_date' : compilation_result1,
-        'compilation_time' : compilation_result2,
-        'compiled_kernel_size' : compilation_result3,
-        'compiled_kernel_version' : compilation_result4,
-        'dependencies' : compilation_result5,
-        'number_cpu_core_used' : compilation_result6,
-        'compressed_compiled_kernel_size' : compilation_result7,
-        'stdout_log_file' : compilation_result8,
-        'stderr_log_file' : compilation_result9,
-        'user_output_file' : compilation_result10,
-        'gcc_version' : gcc_version,
-        'tiny' : tiny,
-        'config_file' : config_file,
-        'boot' : boot,
-        'cpu_brand_name' : compilation_result11,
-        'cpu_max_frequency' : compilation_result12,
-        'ram_size' : compilation_result13,
-        'architecture': compilation_result14,
-        'number_cpu_core' : compilation_result15,
-        'mechanical_disk' : compilation_result16,
-        'libc_version' : compilation_result17,
-        'tuxml_version' : compilation_result18,
-        'system_kernel' : compilation_result19,
-        'linux_distribution' : compilation_result20,
-        'linux_distribution_version' : compilation_result21,
-        'system_kernel_version' : compilation_result22
-    }
-
-    return json_structure
-    
     
 ## archive_log
 # @author PICARD Michaël
@@ -462,7 +420,8 @@ if __name__ == "__main__":
         tiny=args.tiny,
         config_file=args.config,
         json_bool=args.json,
-        clang_version=args.clang_version
+        clang_version=args.clang_version,
+        tag=args.tag
     )
 
     # Cleaning the container
