@@ -97,8 +97,10 @@ def parser():
     )
 
     parser.add_argument(
-        "--tag",
+        "--tagbuild",
         type=str,
+        nargs="*",
+        default=None,
         help="Optional. Enables to tag a compilation or a set of compilations (with a string)"
     )
     
@@ -207,7 +209,7 @@ def retrieve_sizes(path, kernel_version):
 # it should be called multiple time for multiple compilation.
 def run(boot, check_size, logger, configuration, environment,
         package_manager, tiny=False, config_file=None,
-        cid_before=None, json_bool=False, clang_version=0, tag=""):
+        cid_before=None, json_bool=False, clang_version=0, tagbuild=None):
     """Do all the tests, from compilation to sending the results to the
     database.
 
@@ -238,6 +240,7 @@ def run(boot, check_size, logger, configuration, environment,
     :param clang_version: Clang version to use. 0 to use GCC. Only 9 and 11 are
         supported on Debian 11.
     :type clang_version: int
+    :type tag: str
 
     """
     compiler_exec = 'gcc'
@@ -273,6 +276,11 @@ def run(boot, check_size, logger, configuration, environment,
             logger.reset_boot_pipe()
 
     cid = 0
+    tagbuild_str = ""
+    if tagbuild:
+        tagbuild_str = ' '.join(tagbuild)
+
+    
 
     configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read()
     json_data = {'cid': 0, 'compilation_date': compilation_result['compilation_date'],
@@ -293,7 +301,7 @@ def run(boot, check_size, logger, configuration, environment,
                  'tuxml_version': environmentsoft['tuxml_version'], 'system_kernel': environmentsoft['system_kernel'],
                  'linux_distribution': environmentsoft['linux_distribution'],
                  'linux_distribution_version': environmentsoft['linux_distribution_version'],
-                 'system_kernel_version': environmentsoft['system_kernel_version'], 'tag': tag}
+                 'system_kernel_version': environmentsoft['system_kernel_version'], 'tagbuild': tagbuild_str}
 
     apiManager = APIManager()
     response = apiManager.sendPost(json_data)
@@ -331,7 +339,7 @@ def create_json_file(cid, json_data):
     json_data["cid"] = cid
 
     with open('Json.json', 'w') as json_file:
-        myJson = json.dump(json_data, json_file)
+        json.dump(json_data, json_file)
 
 
     
@@ -421,7 +429,7 @@ if __name__ == "__main__":
         config_file=args.config,
         json_bool=args.json,
         clang_version=args.clang_version,
-        tag=args.tag
+        tagbuild=args.tagbuild
     )
 
     # Cleaning the container

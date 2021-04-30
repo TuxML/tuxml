@@ -393,9 +393,11 @@ def parser():
     )
 
     parser.add_argument(
-        "--tag",
+        "--tagbuild",
+        nargs="*",
         type=str,
-        help="Optional. Enables to tag a compilation or a set of compilations (with a string)"
+        default=None,
+        help="Optional. Enables to tag a build or a set of builds (with a string)"
     )
 
     return parser.parse_args()
@@ -487,8 +489,8 @@ def check_precondition_and_warning(args):
             print("\t* {}".format(conf))
     if args.seed is not None:
         print("--seed | You are using your specific set of seed options")
-    if args.tag is not None:
-        print("--tag | You are tagging compilation(s)")
+    if args.tagbuild is not None:
+        print("--tagbuild | You are tagging build(s)")
     if args.unit_testing:
         print("--unit_testing | You will unit test the project, which will not compile any "
               "kernel and could have disabled a few of your option choice.")
@@ -741,7 +743,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, seed,
-                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tag
+                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild
                            ):
     """Run a docker container to compiler a Linux kernel
 
@@ -763,6 +765,7 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
     :type boot: bool
     :param check_size: check the size information of the compiled kernel
     :type check_size: bool
+    :type tagbuild: str
     :return: id of the running container
     :rtype: str
     """
@@ -817,16 +820,16 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
         mount_host_dev = "--mount_host_dev"
     else:
         mount_host_dev = ""
-    if tag:
-        tag = "--tag {}".format(tag)
+    if tagbuild:
+        tagb = '--tagbuild "{}"'.format(' '.join(tagbuild))
     else:
-        tag = ""
+        tagb = ""
     if check_size:
         check_size = "--check_size"
     else:
         check_size = ""
-    subprocess.call(
-        args="{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {}| ts -s'".format(
+
+    docker_args = "{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {} {} | ts -s'".format(
             __sudo_right,
             container_id,
             incremental,
@@ -836,8 +839,12 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
             boot,
             check_size,
             json, 
-            tag
-        ),
+            tagb
+        )
+    print("Docker command ", docker_args)
+    set_prompt_color()
+    subprocess.call(
+        args=docker_args,
         shell=True
     )
     return container_id
@@ -938,7 +945,7 @@ def compilation(image, args):
             args.checksize,
             args.json,
             args.mount_host_dev,
-            args.tag
+            tagbuild=args.tagbuild
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
