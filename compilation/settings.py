@@ -11,8 +11,11 @@ STDOUT_FILE = "{}/stdout.log".format(LOG_DIRECTORY)
 STDERR_FILE = "{}/stderr.log".format(LOG_DIRECTORY)
 BOOT_FILE = "{}/boot.log".format(LOG_DIRECTORY)
 
-TINY_CONFIG_SEED_FILE = "/TuxML/compilation/x64.config"
-CONFIG_SEED_FILE = "/TuxML/compilation/tuxml.config"
+# TINY_CONFIG_SEED_FILE = "/TuxML/compilation/x64.config" # deprecated! 
+# preset applies to tiny and randconfig 
+# CONFIG_64BIT=y by default 
+# the content of this file can be overriden with the --preset parameter
+CONFIG_PRESET_FILE = "/TuxML/compilation/preset.config" # "/TuxML/compilation/x64.config" # "/TuxML/compilation/tuxml.config"
 
 DEPENDENCIES_FILE = "/dependencies.txt"
 KERNEL_VERSION_FILE = "/kernel_version.txt"

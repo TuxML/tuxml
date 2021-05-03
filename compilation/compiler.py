@@ -194,12 +194,13 @@ class Compiler:
                 specific_config, "{}/.config".format(self.__kernel_path))
         elif tiny:
             self.__logger.timed_print_output(
-                "Tiny config with preset values here : {} .".format(
-                    settings.TINY_CONFIG_SEED_FILE))
+                "Tiny config with preset values here : ")
+            with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
+                self.__logger.print_output(preset_list.read())
             subprocess.run(
                 args="KCONFIG_ALLCONFIG={} make CC={} -C {} tinyconfig -j{}"
                     .format(
-                    settings.TINY_CONFIG_SEED_FILE,
+                    settings.CONFIG_PRESET_FILE,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
@@ -212,12 +213,12 @@ class Compiler:
         else:
             self.__logger.print_output(
                 "Random config based on the following preset values : ")
-            with open(settings.CONFIG_SEED_FILE, 'r') as seed_list:
-                self.__logger.print_output(seed_list.read())
+            with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
+                self.__logger.print_output(preset_list.read())
             subprocess.run(
                 args="KCONFIG_ALLCONFIG={} make CC={} -C {} randconfig -j{}"
                     .format(
-                    settings.CONFIG_SEED_FILE,
+                    settings.CONFIG_PRESET_FILE,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core

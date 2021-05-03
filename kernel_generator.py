@@ -9,6 +9,7 @@ import argparse
 import subprocess
 import os
 import shutil
+import compilation.settings as settings
 
 __COMPRESSED_IMAGE = "tuxml/tartuxml-gcc6"
 __IMAGE = "tuxml/tuxml-gcc6"
@@ -331,8 +332,7 @@ def parser():
     parser.add_argument(
         "--tiny",
         action="store_true",
-        help="Use Linux tiny configuration. Incompatible with --configs "
-             "argument."
+        help="Use Linux tiny configuration. Incompatible with --configs argument."
     )
     parser.add_argument(
         "--configs",
@@ -340,8 +340,8 @@ def parser():
         help="Give a path to specific configuration files. Incompatible wit --tiny argument."
     )
     parser.add_argument(
-        "--seed",
-        help="Give a path to a specific seed options file. These options will be activated before the others are randomly chosen. The file will replace tuxml.config "
+        "--preset",
+        help="Give a path to a specific preset options file. These options will be activated/deactivated before the others are randomly chosen (works also for tiny). The file will replace compilation/tuxml.config (note: previously known as --seed)"
     )
     parser.add_argument(
         "--linux_version",
@@ -487,8 +487,8 @@ def check_precondition_and_warning(args):
         print("--configs | You are using the following configuration(s):")
         for conf in args.configs:
             print("\t* {}".format(conf))
-    if args.seed is not None:
-        print("--seed | You are using your specific set of seed options")
+    if args.preset is not None:
+        print("--preset | You are using a specific set of options' values (preset=", args.preset, ")")
     if args.tagbuild is not None:
         print("--tagbuild | You are tagging build(s)")
     if args.unit_testing:
@@ -742,7 +742,7 @@ def docker_image_exist(image, tag=None):
         return False
 
 
-def run_docker_compilation(image, incremental, tiny, config, seed,
+def run_docker_compilation(image, incremental, tiny, config, preset,
                            silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild
                            ):
     """Run a docker container to compiler a Linux kernel
@@ -755,8 +755,8 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
     :type tiny: bool
     :param config: path to a configuration file
     :type config: str
-    :param seed:  path to a seed option file
-    :type seed: str
+    :param preset:  path to a preset option file
+    :type preset: str
     :param silent: verbose option
     :type silent: bool
     :param cpu_cores: number of cpu cores for the compilation
@@ -794,10 +794,10 @@ def run_docker_compilation(image, incremental, tiny, config, seed,
                 __sudo_right, config, container_id),
             shell=True
         )
-    elif seed is not None:
+    if preset is not None:
         subprocess.call(
-            args="{}docker cp {} {}:/TuxML/compilation/tuxml.config".format(
-                __sudo_right, seed, container_id),
+            args="{}docker cp {} {}:{}".format(
+                __sudo_right, preset, container_id, settings.CONFIG_PRESET_FILE),
             shell=True
         )
     if silent:
@@ -938,7 +938,7 @@ def compilation(image, args):
             args.incremental,
             args.tiny,
             config,
-            args.seed,
+            args.preset,
             args.silent,
             args.number_cpu,
             args.boot,
