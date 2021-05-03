@@ -1,23 +1,29 @@
 #! /bin/bash 
 
+# two arguments
+
+# first is the path of the Linux kernel source
 path=$1 
+# "built-in.a" or "built-in.o"
+builtin=$2
+
 echo $path
 
-total=0
-echo "sym subsys"
-for d in $(ls $path/*/built-in.a)
+echo "size in subsys"
+for d in $(ls $path/*/$builtin)
 do
-    nb=$(grep .o $d | wc -l)
-    total=$((total + nb))
-    printf "%04d %s\n" $nb $d
+    sz=$(size -t $d)
+    printf "%s\n%s" "$d" "$sz"
+    # echo -n "$d\n$sz"
+    printf "\n==========\n"
 done
 
-arch=$(ls $path/arch/*/built-in.a)
-nb=$(grep .o $arch | wc -l)
-total=$((total + nb))
-printf "%04d %s\n" $nb $arch
-echo "----------"
-printf "%04d total\n" $total
+arch=$(ls $path/arch/*/$builtin)
+sz=$(size -t $arch)
+printf "%s\n%s" "$arch" "$sz"
 printf "\n==========\n"
-wc -l "$path/vmlinux.symvers"
-wc -l "$path/vmlinux"
+
+
+
+
+

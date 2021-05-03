@@ -21,7 +21,10 @@ KERNEL_COMPRESSION_TYPE = ["GZIP", "BZIP2", "LZMA", "XZ", "LZO", "LZ4"]
 KERNEL_COMPRESSION_EXTENSIONS = [".gz", ".bz2", ".lzma", ".xz", ".lzo", ".lz4"]
 
 
+# full report with total per builtin 
 SIZE_REPORT_FILE = '/TuxML/compilation/size_report.sh'
+# coarse grained (smaller report)
+SIZE_REPORT_COARSE_FILE = '/TuxML/compilation/size_report_coarse.sh'
 
 BOOTING_KERNEL_PATH = "{}/arch/x86/boot/bzImage"
 INITRAMFS_PATH = "/root/kdev/build/initramfs-busybox-x86.cpio.gz"

@@ -186,8 +186,7 @@ def retrieve_sizes(path, kernel_version):
     sizes_result = {}
     sizes_result['size_vmlinux'] = subprocess.run(['size {}/vmlinux'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
 
-    sizes_result['size_report'] = subprocess.run(['bash {} {}'.format(settings.SIZE_REPORT_FILE, path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-    # too much 
+    # too much (deprecated)
     # sizes_result['nm_size_vmlinux'] = bz2.compress(
     #                                subprocess.run(["nm --size -r {}/vmlinux | sed 's/^[0]*//'".format(path)], shell=True, stdout=subprocess.PIPE).stdout)
 
@@ -197,10 +196,22 @@ def retrieve_sizes(path, kernel_version):
         minor = int(kversion[1]) # 16
     else:
         minor = 0
+    
+    builtin=None
     if (major == 4 and minor >= 17) or major == 5: # see https://github.com/TuxML/ProjetIrma/issues/180 and https://gitlab.javinator9889.com/Javinator9889/thdkernel/commit/f49821ee32b76b1a356fab17316eb62430182ecf 
-        sizes_result['size_builtin'] = subprocess.run(['size {}/*/built-in.a'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        builtin="built-in.a"       
     else:
-        sizes_result['size_builtin'] = subprocess.run(['size {}/*/built-in.o'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+        builtin="built-in.o"
+
+    # size_report should be preferred (some might be deprecated in the future)
+    # limitation: does not include totals per built-in (deprecated)
+    # sizebuilt1 = subprocess.run(['size {}/*/{}'.format(path, builtin)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8') 
+    # sizebuilt2 = subprocess.run(['size {}/arch/*/{}'.format(path, builtin)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8') 
+    # sizes_result['size_builtin'] = sizebuilt1 + "\n" + sizebuilt2
+
+    # two arguments for the bash scripts: path and kind of built-in (.a or .o)
+    sizes_result['size_report_builtin'] = subprocess.run(['bash {} {} {}'.format(settings.SIZE_REPORT_FILE, path, builtin)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8') # full report 
+    sizes_result['size_report_builtin_coarse'] = subprocess.run(['bash {} {} {}'.format(settings.SIZE_REPORT_COARSE_FILE, path, builtin)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8') # coarse grained report (rough summary)
     return sizes_result
 
 
@@ -283,8 +294,6 @@ def run(boot, check_size, logger, configuration, environment,
     if tagbuild:
         tagbuild_str = ' '.join(tagbuild)
 
-    print("sizes result...")
-    print(sizes_result['size_report'])
 
     configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read()
     json_data = {'cid': 0, 'compilation_date': compilation_result['compilation_date'],
@@ -309,8 +318,8 @@ def run(boot, check_size, logger, configuration, environment,
                  'tagbuild': tagbuild_str, 
                  # TODO: same key, refactor code
                  'size_vmlinux': sizes_result['size_vmlinux'], 
-                 'size_builtin' : sizes_result['size_builtin'],
-                 'size_report': sizes_result['size_report']
+                 'size_report_builtin': sizes_result['size_report_builtin'],
+                 'size_report_builtin_coarse': sizes_result['size_report_builtin_coarse']
                  }
                  # 
 
