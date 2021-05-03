@@ -20,6 +20,9 @@ KERNEL_VERSION_FILE = "/kernel_version.txt"
 KERNEL_COMPRESSION_TYPE = ["GZIP", "BZIP2", "LZMA", "XZ", "LZO", "LZ4"]
 KERNEL_COMPRESSION_EXTENSIONS = [".gz", ".bz2", ".lzma", ".xz", ".lzo", ".lz4"]
 
+
+SIZE_REPORT_FILE = '/TuxML/compilation/size_report.sh'
+
 BOOTING_KERNEL_PATH = "{}/arch/x86/boot/bzImage"
 INITRAMFS_PATH = "/root/kdev/build/initramfs-busybox-x86.cpio.gz"
 MAX_TIME_BOOT = 300

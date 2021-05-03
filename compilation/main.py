@@ -185,8 +185,11 @@ def retrieve_sizes(path, kernel_version):
     """
     sizes_result = {}
     sizes_result['size_vmlinux'] = subprocess.run(['size {}/vmlinux'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-    sizes_result['nm_size_vmlinux'] = bz2.compress(
-                                    subprocess.run(["nm --size -r {}/vmlinux | sed 's/^[0]*//'".format(path)], shell=True, stdout=subprocess.PIPE).stdout)
+
+    sizes_result['size_report'] = subprocess.run(['bash {} {}'.format(settings.SIZE_REPORT_FILE, path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
+    # too much 
+    # sizes_result['nm_size_vmlinux'] = bz2.compress(
+    #                                subprocess.run(["nm --size -r {}/vmlinux | sed 's/^[0]*//'".format(path)], shell=True, stdout=subprocess.PIPE).stdout)
 
     kversion = kernel_version.split(".") # eg 4.16 will give [4, 16]
     major = int(kversion[0]) # 4
@@ -195,9 +198,9 @@ def retrieve_sizes(path, kernel_version):
     else:
         minor = 0
     if (major == 4 and minor >= 17) or major == 5: # see https://github.com/TuxML/ProjetIrma/issues/180 and https://gitlab.javinator9889.com/Javinator9889/thdkernel/commit/f49821ee32b76b1a356fab17316eb62430182ecf 
-        sizes_result['size_builtin'] = bz2.compress(subprocess.run(['size {}/*/built-in.a'.format(path)], shell=True, stdout=subprocess.PIPE).stdout)
+        sizes_result['size_builtin'] = subprocess.run(['size {}/*/built-in.a'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
     else:
-        sizes_result['size_builtin'] = bz2.compress(subprocess.run(['size {}/*/built-in.o'.format(path)], shell=True, stdout=subprocess.PIPE).stdout)
+        sizes_result['size_builtin'] = subprocess.run(['size {}/*/built-in.o'.format(path)], shell=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
     return sizes_result
 
 
@@ -264,10 +267,10 @@ def run(boot, check_size, logger, configuration, environment,
     environmentsoft = environment["software"]
 
     boot_result = None
-    size_result = None # TODO in the JSON!
+    sizes_result = None # TODO in the JSON!
     if compiler.is_successful():
         if check_size:
-            size_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) # TODO in the JSON!
+            sizes_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) # TODO in the JSON!
         if boot:
             boot_checker = BootChecker(logger, configuration['kernel_path'])
             boot_checker.run()
@@ -280,7 +283,8 @@ def run(boot, check_size, logger, configuration, environment,
     if tagbuild:
         tagbuild_str = ' '.join(tagbuild)
 
-    
+    print("sizes result...")
+    print(sizes_result['size_report'])
 
     configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read()
     json_data = {'cid': 0, 'compilation_date': compilation_result['compilation_date'],
@@ -301,7 +305,14 @@ def run(boot, check_size, logger, configuration, environment,
                  'tuxml_version': environmentsoft['tuxml_version'], 'system_kernel': environmentsoft['system_kernel'],
                  'linux_distribution': environmentsoft['linux_distribution'],
                  'linux_distribution_version': environmentsoft['linux_distribution_version'],
-                 'system_kernel_version': environmentsoft['system_kernel_version'], 'tagbuild': tagbuild_str}
+                 'system_kernel_version': environmentsoft['system_kernel_version'], 
+                 'tagbuild': tagbuild_str, 
+                 # TODO: same key, refactor code
+                 'size_vmlinux': sizes_result['size_vmlinux'], 
+                 'size_builtin' : sizes_result['size_builtin'],
+                 'size_report': sizes_result['size_report']
+                 }
+                 # 
 
     apiManager = APIManager()
     response = apiManager.sendPost(json_data)
