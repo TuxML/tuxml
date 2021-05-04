@@ -450,6 +450,9 @@ def check_precondition_and_warning(args):
             "You can't compile with a negative or null number of cpu."
         )
 
+    if args.compiler != "gcc6" and args.compiler != "gcc8" and args.compiler != "gcc10" and args.compiler != "clang9" and args.compiler != "clang11":
+        raise ValueError("Only gcc6, gcc8, gcc10, clang9, and clang11 are supported")
+
     if args.unit_testing:
         args.incremental = 0
         args.tiny = None
@@ -744,7 +747,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, preset,
-                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild
+                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild, compiler
                            ):
     """Run a docker container to compiler a Linux kernel
 
@@ -830,7 +833,15 @@ def run_docker_compilation(image, incremental, tiny, config, preset,
     else:
         check_size = ""
 
-    docker_args = "{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {} {} | ts -s'".format(
+    compiler_instr = "" # gcc by default and no need to mention clang version
+    # if compiler != "gcc6":        
+    if "clang9" == compiler:
+        compiler_instr = "--clang_version 9"
+    elif "clang11" == compiler: 
+        compiler_instr = "--clang_version 11"
+        
+
+    docker_args = "{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {} {} {} | ts -s'".format(
             __sudo_right,
             container_id,
             incremental,
@@ -840,7 +851,8 @@ def run_docker_compilation(image, incremental, tiny, config, preset,
             boot,
             check_size,
             json, 
-            tagb
+            tagb,
+            compiler_instr
         )
     print("Docker command ", docker_args)
     set_prompt_color()
@@ -946,7 +958,8 @@ def compilation(image, args):
             args.checksize,
             args.json,
             args.mount_host_dev,
-            tagbuild=args.tagbuild
+            tagbuild=args.tagbuild,
+            compiler=args.compiler
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
@@ -1035,13 +1048,15 @@ if __name__ == "__main__":
     if args.dev:
         tag = "dev"
     else:
-        tag = "prod"
+        tag = "prod" 
 
+    # clang works only for Docker image with gcc 10 (which is OK!)
+    # https://github.com/TuxML/tuxml/pull/55/commits/cf57b9e709d180f13e213e7b36b4965afad5d906
     if args.compiler != "gcc6":
         if args.compiler == "gcc8":
             __COMPRESSED_IMAGE = "tuxml/tartuxml-gcc8"
             __IMAGE = "tuxml/tuxml-gcc8"
-        elif args.compiler == "gcc10":
+        elif args.compiler == "gcc10" or args.compiler == "clang9" or args.compiler == "clang11":
             __COMPRESSED_IMAGE = "tuxml/tartuxml-gcc10"
             __IMAGE = "tuxml/tuxml-gcc10"
 

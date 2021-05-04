@@ -63,8 +63,8 @@ def parser():
     parser.add_argument(
         "--clang_version",
         type=int,
-        help="Clang version to use. Only versions 9 and 11 are supported. "
-             "May not work with all images. 0 to use GCC.",
+        help="clang version to use. Only versions 9 and 11 are supported. "
+             "May not work with all images (right now works only for Docker image with gcc10). 0 to use GCC, which is default.",
         default=0
     )
     parser.add_argument(
