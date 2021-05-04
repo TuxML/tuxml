@@ -32,3 +32,5 @@ SIZE_REPORT_COARSE_FILE = '/TuxML/compilation/size_report_coarse.sh'
 BOOTING_KERNEL_PATH = "{}/arch/x86/boot/bzImage"
 INITRAMFS_PATH = "/root/kdev/build/initramfs-busybox-x86.cpio.gz"
 MAX_TIME_BOOT = 300
+
+_JSON_INTERNAL_FILENAME='build.json'

@@ -278,10 +278,10 @@ def run(boot, check_size, logger, configuration, environment,
     environmentsoft = environment["software"]
 
     boot_result = None
-    sizes_result = None # TODO in the JSON!
+    sizes_result = None 
     if compiler.is_successful():
         if check_size:
-            sizes_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) # TODO in the JSON!
+            sizes_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) 
         if boot:
             boot_checker = BootChecker(logger, configuration['kernel_path'])
             boot_checker.run()
@@ -358,7 +358,7 @@ def run(boot, check_size, logger, configuration, environment,
 def create_json_file(cid, json_data):
     json_data["cid"] = cid
 
-    with open('Json.json', 'w') as json_file:
+    with open(settings._JSON_INTERNAL_FILENAME, 'w') as json_file:
         json.dump(json_data, json_file)
 
 

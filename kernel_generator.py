@@ -383,8 +383,9 @@ def parser():
     )
     parser.add_argument(
         "--json",
-        action="store_true",
-        help="Optional. Return a json which contain importants informations."
+        type=str,
+        default=None,
+        help="Optional. JSON filename where various informations about the build are locally stored (typically the information sent/stored to the Web API)."
     )
     parser.add_argument(
         "--mount_host_dev",
@@ -480,7 +481,7 @@ def check_precondition_and_warning(args):
     if args.tiny:
         print("--tiny | You are using tiny configuration.")
     if args.json:
-        print("--json | You will save the compilation locally in a json file.")
+        print("--json | You will save the build information locally into a JSON file.")
     if args.mount_host_dev:
         print("--mount_host_dev | You will use your local code instead of the one contained in docker image. Usefull for development only.")
     if args.configs is not None:
@@ -950,7 +951,7 @@ def compilation(image, args):
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)
         if args.json :
-            get_Json(container_id)
+            retrieve_Json(container_id, args.json)
         delete_docker_container(container_id)
     if not args.silent:
         feedback_user(nbcontainer, args.incremental)
@@ -1008,19 +1009,22 @@ def fetch_logs(container_id, directory, silent=False):
         print("Done", flush=True)
 
 
-def get_Json(container_id):
+def retrieve_Json(container_id, json_filename=None):
     set_prompt_color("Light_Blue")
-    print("Try to create JSON file locally : {}{}".format(container_id, ".json"))
+    if json_filename is None: # TODO: actually there is a precondition that precludes the call of the function so we could "return/stop" directly 
+        json_filename = str(container_id) + ".json" # by default, the container ID is the name of the JSON filename
+
+    print("Creating JSON file locally: {}".format(json_filename))
     try:
-        cmd = "{}docker cp {}:Json.json Json/{}.json".format(
-            __sudo_right, container_id, container_id)
+        cmd = "{}docker cp {}:{} Json/{}".format(
+            __sudo_right, container_id, settings._JSON_INTERNAL_FILENAME, json_filename)
         subprocess.run(args=cmd, shell=True, stdout=subprocess.DEVNULL, check=True)
     except subprocess.CalledProcessError as e:
         set_prompt_color("Red")
-        print("Json file was not created locally")
+        print("JSON file was not created locally")
     else:
         set_prompt_color("Green")
-        print("Json file created locally")
+        print("JSON successfully retrieved!")
 
 
 if __name__ == "__main__":
