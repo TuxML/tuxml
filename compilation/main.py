@@ -278,7 +278,8 @@ def run(boot, check_size, logger, configuration, environment,
     environmentsoft = environment["software"]
 
     boot_result = None
-    sizes_result = None 
+    # by default size report is not performed
+    sizes_result = {'size_vmlinux': -2, 'size_report_builtin': None, 'size_report_builtin_coarse': None}  
     if compiler.is_successful():
         if check_size:
             sizes_result = retrieve_sizes(configuration['kernel_path'], configuration['kernel_version_compilation']) 
