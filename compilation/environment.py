@@ -119,25 +119,72 @@ def __get_libc_version():
 # @author LE FLEM Erwan, PICARD Michaël
 # @version 2
 # @brief Retrieve the version of the gcc compiler on this machine.
-def __get_gcc_version():
+def __get_gcc_version(clang_version=0):
+        if clang_version != 0:
+            return "-1" 
         return subprocess.check_output(
             "gcc --version",
             universal_newlines=True,
             shell=True
         ).split(" ")[2][:-1]
 
+## __get_clang_version
+# @brief Retrieve the precise version of the clang compiler on this machine.
+def __get_clang_version(clang_version=0):
+        """:param clang_version: clang compiler version (if any)
+        :type clang_version: int (0: gcc and no clang; 9 or 11 supported right now)
+        """
+         # ad-hoc retrieval of specific clang information
+        if clang_version == 0:
+            return "-1"
+        elif clang_version == 9 or clang_version == 11:
+            if clang_version == 9:
+                compiler_exec = 'clang-9'
+            elif clang_version == 11:
+                compiler_exec = 'clang'
+            
+            # script/cc-version.sh does the job, but let's keep it simple
+            res = subprocess.check_output(
+                compiler_exec + " --version",
+                universal_newlines=True,
+                shell=True
+            )
+            return res.splitlines()[0] # first line
+        else: # unreachable normally
+            return "-1" 
+
+def __get_gcc_longversion(clang_version=0):
+        if clang_version != 0:
+            return "-1" 
+        return subprocess.check_output(
+            "gcc --version",
+            universal_newlines=True,
+            shell=True
+        ).splitlines()[0]
+
+## __get_compiler_version
+# @brief Retrieve the version of the used compiler.
+def __get_compiler_version(clang_version=0):
+        if clang_version == 0:
+            return __get_gcc_longversion(clang_version)
+        else:
+            return __get_clang_version(clang_version)
+
 
 ## __get_software_details
 # @author LE FLEM Erwan, LEBRETON Mickaël, PICARD Michaël
 # @version 2
 # @brief Returns a dictionary containing software details
-# @details It also include systeme details, since it's still software.
-def __get_software_details():
+# @details It also includes system details, since it's still software.
+def __get_software_details(clang_version=0):
     software = {
         "tuxml_version": TUXML_VERSION,
         "libc_version": __get_libc_version(),
-        "gcc_version": __get_gcc_version(),
+        "gcc_version": __get_gcc_version(clang_version), # TODO: deprecated
+        "clang_version": __get_clang_version(clang_version), # TODO: deprecated
+        "compiler_version": __get_compiler_version(clang_version)
     }
+
     software.update(__get_system_details())
     return software
 
@@ -146,10 +193,10 @@ def __get_software_details():
 # @author LEBRETON Mickaël, PICARD Michaël
 # @version 2
 # @brief Return a dictionary about the compilation environment.
-def get_environment_details():
+def get_environment_details(clang_version=0):
     env = {
         "hardware": __get_hardware_details(),
-        "software": __get_software_details()
+        "software": __get_software_details(clang_version)
     }
 
     return env

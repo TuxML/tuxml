@@ -194,13 +194,14 @@ class Compiler:
                 specific_config, "{}/.config".format(self.__kernel_path))
         elif tiny:
             self.__logger.timed_print_output(
-                "Tiny config with preset values here : ")
+                "Tiny config with preset values:")
             with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
                 self.__logger.print_output(preset_list.read())
             subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make CC={} -C {} tinyconfig -j{}"
+                args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} tinyconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
+                    self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
@@ -212,13 +213,14 @@ class Compiler:
             )
         else:
             self.__logger.print_output(
-                "Random config based on the following preset values : ")
+                "Random config based on the following preset values:")
             with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
                 self.__logger.print_output(preset_list.read())
             subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make CC={} -C {} randconfig -j{}"
+                args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} randconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
+                    self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
@@ -275,6 +277,7 @@ class Compiler:
             [
                 "make",
                 "CC={}".format(self.__compiler_exec),
+                "HOSTCC={}".format(self.__compiler_exec),
                 "-C",
                 self.__kernel_path,
                 "-j{}".format(self.__nb_core)
@@ -434,7 +437,8 @@ class Compiler:
 
             self.__enable_only_one_compression_option(compression)
             subprocess.run(
-                args="make CC={} -C {} -j{}".format(
+                args="make CC={} HOSTCC={} -C {} -j{}".format(
+                    self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core
@@ -478,7 +482,8 @@ class Compiler:
             config.write(basic_config)
             config.flush()
             subprocess.run(
-                args="make CC={} -C {} -j{}".format(
+                args="make CC={} HOSTCC={} -C {} -j{}".format(
+                    self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,
                     self.__nb_core

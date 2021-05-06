@@ -133,16 +133,20 @@ def create_logger(silent):
 # @author PICARD Michaël
 # @version 1
 # @brief Retrieve and display the environment dictionary.
-def retrieve_and_display_environment(logger):
+def retrieve_and_display_environment(logger, clang_version=0):
     """Retrieve and display the environment details
 
     :param logger: the logger
     :type logger: `Logger`_
+    :param clang_version: clang compiler version (if any)
+    :type clang_version: int (0: gcc and no clang; 9 or 11 supported right now)
     :return: the environment
     :rtype: dict
     """
     logger.timed_print_output("Getting environment details.")
-    environment = get_environment_details()
+    environment = get_environment_details(clang_version)
+  
+
     print_environment_details(environment, logger.print_output)
     return environment
 
@@ -215,6 +219,8 @@ def retrieve_sizes(path, kernel_version):
     return sizes_result
 
 
+
+
 ## run
 # @author Picard Michaël
 # @version 1
@@ -262,6 +268,7 @@ def run(boot, check_size, logger, configuration, environment,
         compiler_exec = 'clang-9'
     elif clang_version == 11:
         compiler_exec = 'clang'
+
     compiler = Compiler(
         logger=logger,
         package_manager=package_manager,
@@ -276,6 +283,8 @@ def run(boot, check_size, logger, configuration, environment,
     compilation_result = compiler.get_compilation_dictionary()
     environmenthard = environment['hardware']
     environmentsoft = environment["software"]
+  
+
 
     boot_result = None
     # by default size report is not performed
@@ -307,7 +316,10 @@ def run(boot, check_size, logger, configuration, environment,
                  'stdout_log_file': open(logger.get_stdout_file(), "r").read(),
                  'stderr_log_file': open(logger.get_stderr_file(), "r").read(),
                  'user_output_file': open(logger.get_user_output_file(), "r").read(),
-                 'gcc_version': environmentsoft["gcc_version"], 'tiny': tiny, 'config_file': configfile, 'boot': boot,
+                 'gcc_version': environmentsoft["gcc_version"], # TODO soon deprecated 
+                 'clang_version': environmentsoft["clang_version"], # TODO soon deprecated 
+                 'compiler_version': environmentsoft["compiler_version"], # TODO: manage at the Web API level
+                 'tiny': tiny, 'config_file': configfile, 'boot': boot,
                  'cpu_brand_name': environmenthard['cpu_brand_name'],
                  'cpu_max_frequency': environmenthard['cpu_max_frequency'], 'ram_size': environmenthard['ram_size'],
                  'architecture': environmenthard['architecture'], 'number_cpu_core': environmenthard['number_cpu_core'],
@@ -435,7 +447,7 @@ if __name__ == "__main__":
     logger = create_logger(args.silent)
     package_manager = PackageManager(logger, settings.DEPENDENCIES_FILE)
     package_manager.update_system()
-    environment = retrieve_and_display_environment(logger)
+    environment = retrieve_and_display_environment(logger, args.clang_version)
     configuration = retrieve_and_display_configuration(logger, args)
 
     # Do a compilation, do the test and send result
