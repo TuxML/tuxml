@@ -115,19 +115,6 @@ def __get_libc_version():
     ).split(" ")[3][:-1]
 
 
-## __get_gcc_version
-# @author LE FLEM Erwan, PICARD Michaël
-# @version 2
-# @brief Retrieve the version of the gcc compiler on this machine.
-def __get_gcc_version(clang_version=0):
-        if clang_version != 0:
-            return "-1" 
-        return subprocess.check_output(
-            "gcc --version",
-            universal_newlines=True,
-            shell=True
-        ).split(" ")[2][:-1]
-
 ## __get_clang_version
 # @brief Retrieve the precise version of the clang compiler on this machine.
 def __get_clang_version(clang_version=0):
@@ -180,8 +167,6 @@ def __get_software_details(clang_version=0):
     software = {
         "tuxml_version": TUXML_VERSION,
         "libc_version": __get_libc_version(),
-        "gcc_version": __get_gcc_version(clang_version), # TODO: deprecated
-        "clang_version": __get_clang_version(clang_version), # TODO: deprecated
         "compiler_version": __get_compiler_version(clang_version)
     }
 

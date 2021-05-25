@@ -316,9 +316,7 @@ def run(boot, check_size, logger, configuration, environment,
                  'stdout_log_file': open(logger.get_stdout_file(), "r").read(),
                  'stderr_log_file': open(logger.get_stderr_file(), "r").read(),
                  'user_output_file': open(logger.get_user_output_file(), "r").read(),
-                 'gcc_version': environmentsoft["gcc_version"], # TODO soon deprecated 
-                 'clang_version': environmentsoft["clang_version"], # TODO soon deprecated 
-                 'compiler_version': environmentsoft["compiler_version"], # TODO: manage at the Web API level
+                 'compiler_version': environmentsoft["compiler_version"],
                  'tiny': tiny, 'config_file': configfile, 'boot': boot,
                  'cpu_brand_name': environmenthard['cpu_brand_name'],
                  'cpu_max_frequency': environmenthard['cpu_max_frequency'], 'ram_size': environmenthard['ram_size'],
