@@ -4,7 +4,8 @@ class APIManager:
 
     TOKEN = "tokenwrite4jeHmRkh7R"
 
-    DEFAULT_API_ADDRESS = "https://tuxmlweb.istic.univ-rennes1.fr/api/v1/uploadResults"
+    # DEFAULT_API_ADDRESS = "https://tuxmlweb.istic.univ-rennes1.fr/api/v1/uploadResults"
+    DEFAULT_API_ADDRESS = "http://tuxml-data.irisa.fr:8000/api/v1/uploadResults"
 
     DEFAULT_HEADERS = {
         'Content-type': 'application/json',
