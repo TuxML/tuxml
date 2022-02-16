@@ -97,7 +97,8 @@ class Compiler:
         about the process.
 
         """
-        self.__linux_config_generator(self.__tiny, self.__config_file)
+        if self.__linux_config_generator(self.__tiny, self.__config_file) == -1:
+            return -1 # no config file generated
         self.__do_a_compilation()
 
         if self.__compilation_success:
@@ -197,7 +198,8 @@ class Compiler:
                 "Tiny config with preset values:")
             with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
                 self.__logger.print_output(preset_list.read())
-            subprocess.run(
+            try:
+                subprocess.run(
                 args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} tinyconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
@@ -207,16 +209,21 @@ class Compiler:
                     self.__nb_core
                 ),
                 shell=True,
-                stdout=subprocess.DEVNULL,
+                stdout=self.__logger.get_stdout_pipe(), # subprocess.DEVNULL,
                 stderr=self.__logger.get_stderr_pipe(),
                 check=True
-            )
+                )
+            except subprocess.CalledProcessError as e:
+                self.__logger.print_output("Issue with tinyconfig (during config file generation)... probably due to compiler version unsupported")
+                return -1
         else:
             self.__logger.print_output(
                 "Random config based on the following preset values:")
             with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
                 self.__logger.print_output(preset_list.read())
-            subprocess.run(
+
+            try:
+                subprocess.run(
                 args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} randconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
@@ -229,8 +236,13 @@ class Compiler:
                 stdout=subprocess.DEVNULL,
                 stderr=self.__logger.get_stderr_pipe(),
                 check=True
-            )
-                
+                )
+            except subprocess.CalledProcessError as e:
+                self.__logger.print_output("Issue with randconfig (during config file generation)... probably due to compiler version unsupported")
+                return -1
+
+
+
     ## __log_output
     # @author AMIARD Anthony
     # @version 1

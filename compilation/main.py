@@ -279,7 +279,8 @@ def run(boot, check_size, logger, configuration, environment,
         config_file=config_file,
         compiler_exec=compiler_exec
     )
-    compiler.run()
+    if compiler.run() == -1:
+        return -1 # unable to run the compiler eg config file not generated due to compiler deprecated
     compilation_result = compiler.get_compilation_dictionary()
     environmenthard = environment['hardware']
     environmentsoft = environment["software"]
