@@ -5,7 +5,7 @@
 
 import subprocess
 
-from compilation.logger import COLOR_SUCCESS, COLOR_ERROR
+from compilation.logger import COLOR_SUCCESS, COLOR_ERROR, COLOR_WARNING
 
 
 ## PackageManager
@@ -43,20 +43,26 @@ class PackageManager:
     # @brief Update package list and upgrade package who need it.
     def update_system(self):
         """Update package list and upgrade if in need
-
+           some issues may happen https://stackoverflow.com/questions/68802802/repository-http-security-debian-org-debian-security-buster-updates-inrelease
         """
-        self.__logger.timed_print_output("Updating packages repositories.")
-        subprocess.run(
-            "apt-get update && apt-file update",
-            shell=True,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=self.__logger.get_stderr_pipe()
-        )
-        self.__logger.timed_print_output(
-            "Packages repositories updated and packages upgraded.",
-            color=COLOR_SUCCESS
-        )
+        try:
+            self.__logger.timed_print_output("Updating packages repositories.")
+            subprocess.run(
+                "apt-get update && apt-file update",
+                shell=True,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=self.__logger.get_stderr_pipe()
+            )
+            self.__logger.timed_print_output(
+                "Packages repositories updated and packages upgraded.",
+                color=COLOR_SUCCESS
+            )
+        except:
+            self.__logger.timed_print_output(
+                "Packages repositories updated and packages upgraded: possible issues (see error logs)",
+                color=COLOR_WARNING
+            )
 
     ## install_package
     # @author LE FLEM Erwan, LEBRETON Mickaël, MERZOUK Fahim, PICARD Michaël

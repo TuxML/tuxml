@@ -98,6 +98,8 @@ class Compiler:
 
         """
         if self.__linux_config_generator(self.__tiny, self.__config_file) == -1:
+            self.__compilation_success = False
+            self.__set_result_dictionary()
             return -1 # no config file generated
         self.__do_a_compilation()
 
@@ -198,6 +200,7 @@ class Compiler:
                 "Tiny config with preset values:")
             with open(settings.CONFIG_PRESET_FILE, 'r') as preset_list:
                 self.__logger.print_output(preset_list.read())
+
             try:
                 subprocess.run(
                 args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} tinyconfig -j{}"
@@ -209,7 +212,8 @@ class Compiler:
                     self.__nb_core
                 ),
                 shell=True,
-                stdout=self.__logger.get_stdout_pipe(), # subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL, #self.__logger.get_stdout_pipe(), # subprocess.DEVNULL,
+                # decommenting the line below actually prints on the (error) console
                 stderr=self.__logger.get_stderr_pipe(),
                 check=True
                 )
@@ -584,12 +588,17 @@ class Compiler:
         """Retrieve data about compilation and updates ``__result_dictionary``
 
         """
+
+        try:
+            config  = open("{}/.config".format(self.__kernel_path), "rb").read()
+        except:
+            config = bytes() # empty 
+
         self.__result_dictionary = {
             "compilation_date": time.strftime("%Y-%m-%d %H:%M:%S",
                                               time.localtime(time.time())),
             "compilation_time": self.__compilation_time,
-            "config_file": bz2.compress(
-                open("{}/.config".format(self.__kernel_path), "rb").read()),
+            "config_file": bz2.compress(config),
             "stdout_log_file": bz2.compress(
                 open(self.__logger.get_stdout_file(), "rb").read()),
             "stderr_log_file": bz2.compress(

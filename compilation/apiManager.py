@@ -9,7 +9,7 @@ class APIManager:
 
     DEFAULT_HEADERS = {
         'Content-type': 'application/json',
-        'authorization': 'Bearer '+TOKEN
+        'authorization': 'Bearer ' + TOKEN
     }
 
     DEFAULT_AUTH = None

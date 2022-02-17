@@ -279,8 +279,10 @@ def run(boot, check_size, logger, configuration, environment,
         config_file=config_file,
         compiler_exec=compiler_exec
     )
-    if compiler.run() == -1:
-        return -1 # unable to run the compiler eg config file not generated due to compiler deprecated
+
+    compiler.run()
+    # if compiler.run() == -1:
+    #    return -1 # unable to run the compiler eg config file not generated due to compiler deprecated
     compilation_result = compiler.get_compilation_dictionary()
     environmenthard = environment['hardware']
     environmentsoft = environment["software"]
@@ -305,8 +307,12 @@ def run(boot, check_size, logger, configuration, environment,
     if tagbuild:
         tagbuild_str = ' '.join(tagbuild)
 
+    # may happen that config file generation fails
+    try:
+        configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read() # TODO: already set in set_compilation_results (with bz2 compress...)
+    except:
+        configfile = "" # bytes()
 
-    configfile = open("{}/.config".format(compiler.get_kernel_path()), "r").read()
     json_data = {'cid': 0, 'compilation_date': compilation_result['compilation_date'],
                  'compilation_time': compilation_result['compilation_time'],
                  'compiled_kernel_size': compilation_result['compiled_kernel_size'],
