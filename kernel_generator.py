@@ -401,6 +401,15 @@ def parser():
         help="Optional. Enables to tag a build or a set of builds (with a string)"
     )
 
+
+    parser.add_argument(
+        '--arch', 
+        nargs='?', 
+        default='x86_64',
+        const='x86_64',
+        help="Optional and experimental. Enables to set a specific architecture, default is x86_64"
+    )
+
     return parser.parse_args()
 
 
@@ -747,7 +756,7 @@ def docker_image_exist(image, tag=None):
 
 
 def run_docker_compilation(image, incremental, tiny, config, preset,
-                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild, compiler
+                           silent, cpu_cores, boot, check_size, json, mount_host_dev, tagbuild, compiler, arch
                            ):
     """Run a docker container to compiler a Linux kernel
 
@@ -839,9 +848,14 @@ def run_docker_compilation(image, incremental, tiny, config, preset,
         compiler_instr = "--clang_version 9"
     elif "clang11" == compiler: 
         compiler_instr = "--clang_version 11"
-        
+    
 
-    docker_args = "{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {} {} {} | ts -s'".format(
+    if arch:
+        sarch = '--arch {}'.format(arch)
+    else:
+        sarch = ''
+
+    docker_args = "{}docker exec -t {} /bin/bash -c '/TuxML/compilation/main.py {} {} {} {} {} {} {} {} {} {} | ts -s'".format(
             __sudo_right,
             container_id,
             incremental,
@@ -852,7 +866,8 @@ def run_docker_compilation(image, incremental, tiny, config, preset,
             check_size,
             json, 
             tagb,
-            compiler_instr
+            compiler_instr, 
+            sarch
         )
     print("Docker command ", docker_args)
     set_prompt_color()
@@ -959,7 +974,8 @@ def compilation(image, args):
             args.json,
             args.mount_host_dev,
             tagbuild=args.tagbuild,
-            compiler=args.compiler
+            compiler=args.compiler, 
+            arch=args.arch
         )
         if args.logs is not None:
             fetch_logs(container_id, args.logs, args.silent)

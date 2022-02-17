@@ -52,7 +52,7 @@ class Compiler:
     """    
     def __init__(self, logger, package_manager, nb_core, kernel_path,
                  kernel_version, tiny=False, config_file=None,
-                 compiler_exec='gcc'):
+                 compiler_exec='gcc', arch='x86_64'):
         """Constructor method
 
         """
@@ -69,6 +69,7 @@ class Compiler:
         self.__tiny = tiny
         self.__config_file = config_file
         self.__compiler_exec = compiler_exec
+        self.__arch = arch
 
         # Variables results
         self.__compilation_success = False
@@ -97,7 +98,7 @@ class Compiler:
         about the process.
 
         """
-        if self.__linux_config_generator(self.__tiny, self.__config_file) == -1:
+        if self.__linux_config_generator(self.__tiny, self.__config_file, self.__arch) == -1:
             self.__compilation_success = False
             self.__set_result_dictionary()
             return -1 # no config file generated
@@ -181,9 +182,10 @@ class Compiler:
     # @author LEBRETON Mickaël, PICARD Michaël
     # @version 2
     # @brief Generate .config in the kernel folder, in order to compile with it.
-    def __linux_config_generator(self, tiny, specific_config):
+    def __linux_config_generator(self, tiny, specific_config, arch='x86_64'):
         """Generates .config in the kernel directory. (Calls tinyconfig or
         randconfig)
+        By default, x86_64 is targeted
 
         :param tiny: set to True if you want a tiny Linux
         configuration. False otherwise.
@@ -203,9 +205,10 @@ class Compiler:
 
             try:
                 subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} tinyconfig -j{}"
+                args="KCONFIG_ALLCONFIG={} ARCH={} make CC={} HOSTCC={} -C {} tinyconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
+                    arch,
                     self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,
@@ -228,9 +231,10 @@ class Compiler:
 
             try:
                 subprocess.run(
-                args="KCONFIG_ALLCONFIG={} make CC={} HOSTCC={} -C {} randconfig -j{}"
+                args="KCONFIG_ALLCONFIG={} ARCH={} make CC={} HOSTCC={} -C {} randconfig -j{}"
                     .format(
                     settings.CONFIG_PRESET_FILE,
+                    arch,
                     self.__compiler_exec,
                     self.__compiler_exec,
                     self.__kernel_path,

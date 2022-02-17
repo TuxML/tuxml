@@ -103,6 +103,14 @@ def parser():
         default=None,
         help="Optional. Enables to tag a compilation or a set of compilations (with a string)"
     )
+
+    parser.add_argument(
+        '--arch', 
+        nargs='?', 
+        default='x86_64',
+        const='x86_64',
+        help="Optional and experimental. Enables to set a specific architecture, default is x86_64"
+    )
     
     return parser.parse_args()
 
@@ -229,7 +237,7 @@ def retrieve_sizes(path, kernel_version):
 # it should be called multiple time for multiple compilation.
 def run(boot, check_size, logger, configuration, environment,
         package_manager, tiny=False, config_file=None,
-        cid_before=None, json_bool=False, clang_version=0, tagbuild=None):
+        cid_before=None, json_bool=False, clang_version=0, tagbuild=None, arch='x86_64'):
     """Do all the tests, from compilation to sending the results to the
     database.
 
@@ -277,7 +285,8 @@ def run(boot, check_size, logger, configuration, environment,
         kernel_version=configuration['kernel_version_compilation'],
         tiny=tiny,
         config_file=config_file,
-        compiler_exec=compiler_exec
+        compiler_exec=compiler_exec, 
+        arch=arch # TODO: save the information in the JSON/database
     )
 
     compiler.run()
@@ -467,7 +476,8 @@ if __name__ == "__main__":
         config_file=args.config,
         json_bool=args.json,
         clang_version=args.clang_version,
-        tagbuild=args.tagbuild
+        tagbuild=args.tagbuild,
+        arch=args.arch
     )
 
     # Cleaning the container
